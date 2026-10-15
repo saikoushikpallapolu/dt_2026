@@ -58,7 +58,7 @@ export function createApp(appEnv: AppEnv) {
   app.use("/api/v1/meetings", createMeetingsRouter());
   app.use("/api/v1/favorites", createFavoritesRouter());
   app.use("/api/v1/notifications", createNotificationsRouter());
-  app.use("/api/v1/admin", createAdminRouter());
+  app.use("/api/v1/admin", createAdminRouter(appEnv));
 
   // 404 handler
   app.use((req, res) => {

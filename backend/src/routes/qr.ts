@@ -144,19 +144,49 @@ export function createQrRouter(appEnv: AppEnv): Router {
   router.get("/:token/image", async (req, res, next) => {
     try {
       const { token } = req.params;
-      const targetUrl = `${appEnv.PUBLIC_BASE_URL}/qr/${token}`;
+      const originFromQuery = req.query.origin as string | undefined;
+      let originFromHeader: string | null = null;
+      try {
+        const referer = req.get("referer");
+        if (referer) originFromHeader = new URL(referer).origin;
+      } catch {
+        // ignore parse error
+      }
+      const clientOrigin = originFromQuery || originFromHeader || appEnv.PUBLIC_BASE_URL;
+      
+      // If client origin is localhost/127.0.0.1, auto-substitute machine's Wi-Fi/LAN IPv4
+      // so native mobile phone cameras scanning the monitor screen can reach the web app
+      let targetOrigin = clientOrigin;
+      if (targetOrigin.includes("localhost") || targetOrigin.includes("127.0.0.1")) {
+        const interfaces = (await import("node:os")).networkInterfaces();
+        let localIp: string | null = null;
+        for (const name of Object.keys(interfaces)) {
+          for (const net of interfaces[name] || []) {
+            if (net.family === "IPv4" && !net.internal) {
+              localIp = net.address;
+              break;
+            }
+          }
+          if (localIp) break;
+        }
+        if (localIp) {
+          targetOrigin = targetOrigin.replace("localhost", localIp).replace("127.0.0.1", localIp);
+        }
+      }
+
+      const targetUrl = `${targetOrigin}/qr/${token}`;
 
       const buffer = await QRCode.toBuffer(targetUrl, {
         width: 384,
         margin: 2,
         color: {
-          dark: "#0f172a",
+          dark: "#1e1338",
           light: "#ffffff",
         },
       });
 
       res.setHeader("Content-Type", "image/png");
-      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.setHeader("Cache-Control", "public, max-age=60");
       res.send(buffer);
     } catch (err) {
       next(err);

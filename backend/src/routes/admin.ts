@@ -5,7 +5,8 @@ import { z } from "zod";
 import { FacultyStatus, ProfileVisibility, UserRole } from "@prisma/client";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
-import { formatStatusDetail } from "../services/status-service.js";
+import { formatStatusDetail, updateProfessorStatus } from "../services/status-service.js";
+import type { AppEnv } from "../config/env.js";
 import type { AdminAnalytics, AuditLogItem } from "@wimp/shared";
 
 function slugify(text: string): string {
@@ -55,7 +56,20 @@ const createDepartmentSchema = z.object({
   code: z.string().min(1).max(10),
 });
 
-export function createAdminRouter(): Router {
+const quickOnboardSchema = z.object({
+  displayName: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(6).default("DemoPass123!"),
+  designation: z.string().min(2).default("Assistant Professor"),
+  departmentName: z.string().min(2),
+  buildingName: z.string().min(2).default("Ada Lovelace Hall"),
+  room: z.string().min(1),
+  floor: z.string().optional().default("2"),
+  initialStatus: z.nativeEnum(FacultyStatus).default(FacultyStatus.AVAILABLE),
+  publicMessage: z.string().optional().nullable(),
+});
+
+export function createAdminRouter(appEnv: AppEnv): Router {
   const router = Router();
 
   // All admin routes require ADMINISTRATOR role
@@ -257,6 +271,190 @@ export function createAdminRouter(): Router {
       });
 
       res.json({ ok: true, professor: updated });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Dynamic status trigger for any professor
+  router.post("/professors/:id/status", async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { status, expectedReturnAt, alternateLocation, publicMessage } = req.body;
+
+      const professor = await prisma.professor.findUnique({ where: { id } });
+      if (!professor) {
+        res.status(404).json({ error: { code: "NOT_FOUND", message: "Professor not found" } });
+        return;
+      }
+
+      const updated = await updateProfessorStatus({
+        professorId: id,
+        actorUserId: req.user!.id,
+        status: status as any,
+        expectedReturnAt: expectedReturnAt || null,
+        alternateLocation: alternateLocation || null,
+        publicMessage: publicMessage || null,
+        appEnv,
+      });
+
+      res.json({ ok: true, status: updated });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // Dynamic quick-onboard endpoint (auto-creates department/office if needed)
+  router.post("/quick-onboard", async (req, res, next) => {
+    try {
+      const parsed = quickOnboardSchema.safeParse(req.body);
+      if (!parsed.success) {
+        res.status(400).json({
+          error: {
+            code: "VALIDATION_ERROR",
+            message: "Invalid onboarding payload",
+            details: parsed.error.flatten(),
+          },
+        });
+        return;
+      }
+
+      const {
+        displayName,
+        email,
+        password,
+        designation,
+        departmentName,
+        buildingName,
+        room,
+        floor,
+        initialStatus,
+        publicMessage,
+      } = parsed.data;
+
+      const lowerEmail = email.toLowerCase();
+      const existingUser = await prisma.user.findUnique({ where: { email: lowerEmail } });
+      if (existingUser) {
+        res.status(409).json({ error: { code: "EMAIL_TAKEN", message: "User with this email already exists" } });
+        return;
+      }
+
+      // Find or create department
+      let dept = await prisma.department.findFirst({
+        where: { name: { equals: departmentName, mode: "insensitive" } },
+      });
+      if (!dept) {
+        const code = departmentName
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 5) || "DEPT";
+        dept = await prisma.department.create({
+          data: { name: departmentName, code },
+        });
+      }
+
+      // Find or create building
+      let building = await prisma.building.findFirst({
+        where: { name: { equals: buildingName, mode: "insensitive" } },
+      });
+      if (!building) {
+        const code = buildingName
+          .split(" ")
+          .map((w) => w[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 4) || "BLD";
+        building = await prisma.building.create({
+          data: { name: buildingName, code },
+        });
+      }
+
+      // Find or create office
+      let office = await prisma.office.findFirst({
+        where: {
+          buildingId: building.id,
+          room: { equals: room, mode: "insensitive" },
+        },
+      });
+      if (!office) {
+        office = await prisma.office.create({
+          data: {
+            buildingId: building.id,
+            room,
+            floor: floor || "1",
+            label: `Office ${room}`,
+          },
+        });
+      }
+
+      // Slug
+      let baseSlug = slugify(displayName);
+      let candidateSlug = baseSlug;
+      let counter = 1;
+      while (await prisma.professor.findUnique({ where: { slug: candidateSlug } })) {
+        candidateSlug = `${baseSlug}-${counter++}`;
+      }
+
+      const passwordHash = await bcrypt.hash(password, 12);
+      const initialQrToken = `qr-${candidateSlug}-${crypto.randomBytes(3).toString("hex")}`;
+
+      const created = await prisma.$transaction(async (tx) => {
+        const user = await tx.user.create({
+          data: {
+            email: lowerEmail,
+            passwordHash,
+            role: UserRole.PROFESSOR,
+          },
+        });
+
+        const professor = await tx.professor.create({
+          data: {
+            userId: user.id,
+            slug: candidateSlug,
+            displayName,
+            designation,
+            departmentId: dept!.id,
+            officeId: office!.id,
+            visibility: ProfileVisibility.PUBLIC,
+          },
+        });
+
+        await tx.professorStatus.create({
+          data: {
+            professorId: professor.id,
+            status: initialStatus,
+            publicMessage: publicMessage || null,
+          },
+        });
+
+        await tx.qrCode.create({
+          data: {
+            professorId: professor.id,
+            token: initialQrToken,
+            isActive: true,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorUserId: req.user!.id,
+            action: "PROFESSOR_ONBOARD",
+            entityType: "professor",
+            entityId: professor.id,
+            metadata: { email: lowerEmail, slug: candidateSlug, initialQrToken },
+          },
+        });
+
+        return professor;
+      });
+
+      res.status(201).json({
+        ok: true,
+        professor: created,
+        initialQrToken,
+      });
     } catch (err) {
       next(err);
     }

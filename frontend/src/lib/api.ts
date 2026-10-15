@@ -71,8 +71,10 @@ export const api = {
     return request<QrStatusResponse>(`/qr/${token}`);
   },
 
-  getQrImageUrl(token: string): string {
-    return `${API_BASE_URL}/qr/${token}/image`;
+  getQrImageUrl(token: string, targetOrigin?: string): string {
+    const origin = targetOrigin || (typeof window !== "undefined" ? window.location.origin : "");
+    const param = origin ? `?origin=${encodeURIComponent(origin)}` : "";
+    return `${API_BASE_URL}/qr/${token}/image${param}`;
   },
 
   // Faculty Directory
@@ -235,6 +237,39 @@ export const api = {
   async revokeAdminQr(qrId: string): Promise<{ ok: boolean; qr: any }> {
     return request(`/admin/qr/${qrId}/revoke`, {
       method: "POST",
+    });
+  },
+
+  async quickOnboardFaculty(payload: {
+    displayName: string;
+    email: string;
+    password?: string;
+    designation?: string;
+    departmentName: string;
+    buildingName?: string;
+    room: string;
+    floor?: string;
+    initialStatus?: string;
+    publicMessage?: string;
+  }): Promise<{ ok: boolean; professor: any; initialQrToken: string }> {
+    return request("/admin/quick-onboard", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async adminUpdateProfessorStatus(
+    professorId: string,
+    payload: {
+      status: string;
+      expectedReturnAt?: string | null;
+      alternateLocation?: string | null;
+      publicMessage?: string | null;
+    }
+  ): Promise<{ ok: boolean; status: any }> {
+    return request(`/admin/professors/${professorId}/status`, {
+      method: "POST",
+      body: JSON.stringify(payload),
     });
   },
 
