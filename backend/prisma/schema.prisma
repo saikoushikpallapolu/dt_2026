@@ -1,0 +1,280 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  PROFESSOR
+  ADMINISTRATOR
+}
+
+enum FacultyStatus {
+  AVAILABLE
+  IN_CLASS
+  IN_MEETING
+  AWAY
+  ON_LEAVE
+  UNKNOWN
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  HIDDEN
+}
+
+enum MeetingRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  RESCHEDULE_PROPOSED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  professor           Professor?
+  sessions            Session[]
+  notifications       Notification[]
+  favorites           Favorite[]
+  meetingRequests     MeetingRequest[]      @relation("StudentMeetings")
+  statusHistoryWrites StatusHistory[]
+  auditLogs           AuditLog[]
+  meetingEvents       MeetingRequestEvent[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Department {
+  id         String      @id @default(uuid())
+  name       String
+  code       String      @unique
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  professors Professor[]
+
+  @@map("departments")
+}
+
+model Building {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  offices   Office[]
+
+  @@map("buildings")
+}
+
+model Office {
+  id         String      @id @default(uuid())
+  buildingId String      @map("building_id")
+  floor      String
+  room       String
+  label      String?
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  building   Building    @relation(fields: [buildingId], references: [id])
+  professors Professor[]
+
+  @@unique([buildingId, floor, room])
+  @@map("offices")
+}
+
+model Professor {
+  id                  String            @id @default(uuid())
+  userId              String            @unique @map("user_id")
+  slug                String            @unique
+  displayName         String            @map("display_name")
+  designation         String
+  departmentId        String            @map("department_id")
+  officeId            String?           @map("office_id")
+  photoUrl            String?           @map("photo_url")
+  publicContact       String?           @map("public_contact")
+  consultationDetails String?           @map("consultation_details")
+  visibility          ProfileVisibility @default(PUBLIC)
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @updatedAt @map("updated_at")
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department      Department       @relation(fields: [departmentId], references: [id])
+  office          Office?          @relation(fields: [officeId], references: [id])
+  currentStatus   ProfessorStatus?
+  statusHistory   StatusHistory[]
+  qrCodes         QrCode[]
+  officeHours     OfficeHour[]
+  meetingRequests MeetingRequest[]
+  favorites       Favorite[]
+
+  @@index([departmentId])
+  @@index([officeId])
+  @@map("professors")
+}
+
+model ProfessorStatus {
+  id                String         @id @default(uuid())
+  professorId       String         @unique @map("professor_id")
+  status            FacultyStatus  @default(UNKNOWN)
+  expectedReturnAt  DateTime?      @map("expected_return_at")
+  alternateLocation String?        @map("alternate_location")
+  publicMessage     String?        @map("public_message")
+  expiresAt         DateTime?      @map("expires_at")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+  professor         Professor      @relation(fields: [professorId], references: [id], onDelete: Cascade)
+
+  @@map("professor_statuses")
+}
+
+model StatusHistory {
+  id                String         @id @default(uuid())
+  professorId       String         @map("professor_id")
+  recordedByUserId  String         @map("recorded_by_user_id")
+  status            FacultyStatus
+  expectedReturnAt  DateTime?      @map("expected_return_at")
+  alternateLocation String?        @map("alternate_location")
+  publicMessage     String?        @map("public_message")
+  expiresAt         DateTime?      @map("expires_at")
+  recordedAt        DateTime       @default(now()) @map("recorded_at")
+  professor         Professor      @relation(fields: [professorId], references: [id], onDelete: Cascade)
+  recordedBy        User           @relation(fields: [recordedByUserId], references: [id])
+
+  @@index([professorId, recordedAt])
+  @@map("status_history")
+}
+
+model QrCode {
+  id          String     @id @default(uuid())
+  professorId String     @map("professor_id")
+  token       String     @unique
+  isActive    Boolean    @default(true) @map("is_active")
+  revokedAt   DateTime?  @map("revoked_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  professor   Professor  @relation(fields: [professorId], references: [id], onDelete: Cascade)
+
+  @@index([professorId, isActive])
+  @@map("qr_codes")
+}
+
+model OfficeHour {
+  id          String    @id @default(uuid())
+  professorId String    @map("professor_id")
+  dayOfWeek   Int       @map("day_of_week")
+  startTime   String    @map("start_time")
+  endTime     String    @map("end_time")
+  notes       String?
+  professor   Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
+
+  @@index([professorId])
+  @@map("office_hours")
+}
+
+model MeetingRequest {
+  id            String                @id @default(uuid())
+  studentUserId String                @map("student_user_id")
+  professorId   String                @map("professor_id")
+  reason        String
+  proposedStart DateTime              @map("proposed_start")
+  proposedEnd   DateTime              @map("proposed_end")
+  note          String?
+  status        MeetingRequestStatus  @default(PENDING)
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+  student       User                  @relation("StudentMeetings", fields: [studentUserId], references: [id])
+  professor     Professor             @relation(fields: [professorId], references: [id])
+  events        MeetingRequestEvent[]
+
+  @@index([professorId, status])
+  @@index([studentUserId])
+  @@map("meeting_requests")
+}
+
+model MeetingRequestEvent {
+  id               String                @id @default(uuid())
+  meetingRequestId String                @map("meeting_request_id")
+  actorUserId      String                @map("actor_user_id")
+  fromStatus       MeetingRequestStatus? @map("from_status")
+  toStatus         MeetingRequestStatus  @map("to_status")
+  note             String?
+  createdAt        DateTime              @default(now()) @map("created_at")
+  meetingRequest   MeetingRequest        @relation(fields: [meetingRequestId], references: [id], onDelete: Cascade)
+  actor            User                  @relation(fields: [actorUserId], references: [id])
+
+  @@index([meetingRequestId])
+  @@map("meeting_request_events")
+}
+
+model Favorite {
+  id            String    @id @default(uuid())
+  studentUserId String    @map("student_user_id")
+  professorId   String    @map("professor_id")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  student       User      @relation(fields: [studentUserId], references: [id], onDelete: Cascade)
+  professor     Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
+
+  @@unique([studentUserId, professorId])
+  @@map("favorites")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  type      String
+  title     String
+  body      String
+  payload   Json?
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorUserId String?  @map("actor_user_id")
+  action      String
+  entityType  String   @map("entity_type")
+  entityId    String?  @map("entity_id")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+  actor       User?    @relation(fields: [actorUserId], references: [id])
+
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
+
+model AppSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}

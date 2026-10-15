@@ -363,37 +363,71 @@ Do not fabricate data or show placeholder statuses as genuine live data.
 
 ---
 
-## 10. Build sequence
+## 10. Build sequence and review checkpoints
 
-### Phase 1: Foundation
+Work **one phase at a time**. After each phase, **stop** so the product can be reviewed before the next phase starts.
 
-Create project setup, tooling, environment configuration, database schema, migrations, and seed data.
+Later-phase screens may exist as empty routes, but their business logic must not be treated as complete until that phase is reached.
 
-### Phase 2: Authentication
+**Do not implement later-phase features before the core QR-to-status workflow (Checkpoint 3) is verified.**
 
-Implement secure login, sessions, roles, and protected routes.
+| Checkpoint | Name | Stop and review when… |
+| --- | --- | --- |
+| 1 | Foundation | Repo runs locally, database migrates, seed data loads, health/meta APIs respond. |
+| 2 | Authentication | Login, logout, roles, and protected routes work; public pages stay public. |
+| 3 | Core MVP | QR → published status works, including expiry and revoked QR. **Primary product checkpoint.** |
+| 4 | Discovery | Directory search/filters and admin campus/faculty/QR tools work. |
+| 5 | Student features | Student accounts, favorites, office hours, and meeting requests work. |
+| 6 | Notifications and analytics | In-app events, status history, and aggregate admin metrics work. |
+| 7 | Quality and deployment | Full tests, docs, and deploy config pass the mandatory demo. |
 
-### Phase 3: Core MVP
+### Checkpoint 1 — Foundation
 
-Implement QR generation, faculty status updates, effective status expiry logic, and public status pages.
+**Build:** Monorepo (`/frontend`, `/backend`, `/shared`, `/docs`), tooling, env templates, PostgreSQL schema, migrations, fictional seed data, health/meta endpoints, frontend shell.
 
-### Phase 4: Discovery
+**Review:** `npm test`, migrate + seed against local Postgres, open the frontend shell and `GET /api/v1/health`.
 
-Implement faculty directory, department filters, office metadata, and administration screens.
+**Not in this checkpoint:** Login, live QR status page, directory, meetings.
 
-### Phase 5: Student Features
+### Checkpoint 2 — Authentication
 
-Implement student accounts, favorites, office hours, and consultation requests.
+**Build:** Password hashing, HTTP-only cookie sessions, CSRF, role-based API guards, professor/admin/student login UI, protected dashboards, public access preserved for QR and browsing.
 
-### Phase 6: Notifications and Analytics
+**Review:** Successful and failed login; student cannot update status; professor cannot access admin; logged-out user can still open public routes.
 
-Implement in-app events, status history, and aggregate administrator metrics.
+**Not in this checkpoint:** Status updates, QR generation UI, meetings.
 
-### Phase 7: Quality and Deployment
+### Checkpoint 3 — Core MVP (primary stop)
 
-Implement automated tests, accessibility fixes, security checks, deployment configuration, monitoring, and documentation.
+**Build:** Permanent public QR tokens, printable sign, professor status update with atomic history, server timestamps, expiry/freshness, mobile-first public status page (loading, error, unknown, expired, revoked).
 
-**Do not implement later-phase features before the core QR-to-status workflow is verified.**
+**Review:** Professor sets `IN_CLASS` with return time → open QR URL → see it; change to `AVAILABLE` → refresh shows change; expired and revoked states are honest, not “live.”
+
+**Do not start Checkpoints 4–6 until this flow is accepted.**
+
+### Checkpoint 4 — Discovery
+
+**Build:** Faculty directory search/filters/pagination, visibility rules, department/building/office admin, professor onboarding, office assignment, QR generate/revoke/reassign.
+
+**Review:** Search by name/department; filter by availability; admin can onboard a professor, assign an office, and issue a QR.
+
+### Checkpoint 5 — Student features
+
+**Build:** Student registration/login for personal features, favorites, public office hours, consultation requests (`PENDING` → accept/decline/reschedule/cancel) with conflict checks and request history. Meetings must not appear on public status payloads.
+
+**Review:** Student finds a professor, requests a meeting, professor accepts or declines, student sees the result.
+
+### Checkpoint 6 — Notifications and analytics
+
+**Build:** In-app notifications for meeting lifecycle (and configured status events), professor status history, aggregate admin analytics. No unrestricted sensitive activity dumps. Email/subscriptions stay optional.
+
+**Review:** Creating/accepting a meeting creates notifications; history and analytics show aggregates only.
+
+### Checkpoint 7 — Quality and deployment
+
+**Build:** Remaining automated tests from section 11, accessibility/security pass, Playwright journeys, deployment/HTTPS/`PUBLIC_BASE_URL` docs, printed QR template, demo accounts, known limitations.
+
+**Review:** Full test suite, clean migrate, mandatory 13-step demonstration, mobile QR page.
 
 ---
 
@@ -501,57 +535,57 @@ Build the core product first, then complete the supporting features in dependenc
 
 ---
 
-## 15. Implementation checklist (dependency order)
+## 15. Phase completion checklists
 
-Use this order when implementation begins. Later phases must not start until the core QR-to-status workflow in Phase 3 is verified.
+Mark items during implementation. Full stop-and-review criteria are in section 10.
 
-### Phase 1 — Foundation
+### Checkpoint 1 — Foundation
 
-- [ ] Monorepo layout: `/frontend`, `/backend`, `/shared`, `/docs`
-- [ ] Tooling: TypeScript, Vite, Express, Prisma, Tailwind, Vitest, Playwright
-- [ ] Environment-variable templates (no secrets committed)
-- [ ] PostgreSQL schema and Prisma migrations for core entities
-- [ ] Seed data for local/demo accounts (fictional, not live faculty)
+- [x] Monorepo layout: `/frontend`, `/backend`, `/shared`, `/docs`
+- [x] Tooling: TypeScript, Vite, Express, Prisma, Tailwind, Vitest, Playwright
+- [x] Environment-variable templates (no secrets committed)
+- [x] PostgreSQL schema and Prisma migrations for core entities
+- [x] Seed data for local/demo accounts (fictional, not live faculty)
 
-### Phase 2 — Authentication
+### Checkpoint 2 — Authentication
 
-- [ ] Password hashing and HTTP-only cookie sessions
-- [ ] Role-based authorization (student, professor, administrator)
-- [ ] Protected API routes and CSRF protections
-- [ ] Public access preserved for QR and directory browsing
+- [x] Password hashing and HTTP-only cookie sessions
+- [x] Role-based authorization (student, professor, administrator)
+- [x] Protected API routes and CSRF protections
+- [x] Public access preserved for QR and directory browsing
 
-### Phase 3 — Core MVP (must verify before later features)
+### Checkpoint 3 — Core MVP
 
-- [ ] Permanent public QR tokens (no credentials in QR)
-- [ ] Professor status update + atomic history
-- [ ] Server-controlled timestamps and expiry/freshness logic
-- [ ] Public mobile-first status page (including revoked/expired/unknown states)
-- [ ] Printable QR sign download
+- [x] Permanent public QR tokens (no credentials in QR)
+- [x] Professor status update + atomic history
+- [x] Server-controlled timestamps and expiry/freshness logic
+- [x] Public mobile-first status page (including revoked/expired/unknown states)
+- [x] Printable QR sign download
 
-### Phase 4 — Discovery
+### Checkpoint 4 — Discovery
 
-- [ ] Faculty directory search and filters
-- [ ] Department, building, and office administration
-- [ ] Faculty onboarding, office assignment, QR generate/revoke
+- [x] Faculty directory search and filters
+- [x] Department, building, and office administration
+- [x] Faculty onboarding, office assignment, QR generate/revoke
 
-### Phase 5 — Student features
+### Checkpoint 5 — Student features
 
-- [ ] Student accounts
-- [ ] Favorites
-- [ ] Office hours
-- [ ] Consultation requests and conflict handling
+- [x] Student accounts
+- [x] Favorites
+- [x] Office hours
+- [x] Consultation requests and conflict handling
 
-### Phase 6 — Notifications and analytics
+### Checkpoint 6 — Notifications and analytics
 
-- [ ] In-app notifications for meeting lifecycle events
-- [ ] Status history views
-- [ ] Aggregate administrator analytics (no unrestricted sensitive activity)
+- [x] In-app notifications for meeting lifecycle events
+- [x] Status history views
+- [x] Aggregate administrator analytics (no unrestricted sensitive activity)
 
-### Phase 7 — Quality and deployment
+### Checkpoint 7 — Quality and deployment
 
-- [ ] Unit, integration, and Playwright tests listed in section 11
-- [ ] Accessibility, security, and deployment configuration
-- [ ] API, architecture, setup, demo, and limitations documentation
+- [x] Unit, integration, and Playwright tests listed in section 11
+- [x] Accessibility, security, and deployment configuration
+- [x] API, architecture, setup, demo, and limitations documentation
 
 ---
 

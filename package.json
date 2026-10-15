@@ -1,0 +1,26 @@
+{
+  "name": "where-is-my-professor",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @wimp/backend\" \"npm run dev -w @wimp/frontend\"",
+    "build": "npm run build -w @wimp/shared && npm run build -w @wimp/backend && npm run build -w @wimp/frontend",
+    "test": "npm run test -w @wimp/shared && npm run test -w @wimp/backend",
+    "db:up": "docker compose up -d",
+    "db:migrate": "npm run prisma:migrate -w @wimp/backend",
+    "db:seed": "npm run prisma:seed -w @wimp/backend",
+    "db:reset": "npm run prisma:reset -w @wimp/backend"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

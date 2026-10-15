@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: wimp
+      POSTGRES_PASSWORD: wimp
+      POSTGRES_DB: wimp
+    ports:
+      - "5432:5432"
+    volumes:
+      - wimp_pgdata:/var/lib/postgresql/data
+
+volumes:
+  wimp_pgdata:
