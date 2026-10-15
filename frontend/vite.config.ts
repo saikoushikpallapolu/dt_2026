@@ -12,6 +12,13 @@ export default defineConfig({
     },
   },
   server: {
+    host: true, // Listen on all network interfaces (for mobile phone access)
     port: 5173,
+    proxy: {
+      "/api": {
+        target: "http://localhost:4000",
+        changeOrigin: true,
+      },
+    },
   },
 });
