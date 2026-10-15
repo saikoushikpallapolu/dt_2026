@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Html5Qrcode } from "html5-qrcode";
 import {
+  ArrowRight,
   Camera,
   CameraOff,
   CheckCircle2,
@@ -92,7 +93,7 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
 
       const cameras = await Html5Qrcode.getCameras();
       if (!cameras || cameras.length === 0) {
-        setScannerError("No cameras detected on this device. You can use the Quick Placards or Upload Image tabs.");
+        setScannerError("No cameras detected on this device. You can use the Sample Placards or Upload Image tabs.");
         return;
       }
 
@@ -104,30 +105,45 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
         {
           fps: 10,
           qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
         },
         (decodedText) => {
           handleScanSuccess(decodedText);
         },
         () => {
-          // scanning frame without detection, ignore
-        },
+          // scanning frame - no error needed
+        }
       );
     } catch (err: any) {
-      console.warn("Camera start failed:", err);
       setIsScanning(false);
-      setScannerError(
-        err?.message || "Camera permission was denied or camera is currently in use. You can use Quick Placards below.",
-      );
+      setScannerError(err.message || "Could not access device camera. Please check browser permissions.");
     }
   };
 
+  // Stop Camera
   const stopCamera = async () => {
     if (html5QrCodeRef.current && isScanning) {
       try {
         await html5QrCodeRef.current.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       setIsScanning(false);
+    }
+  };
+
+  // Handle Image Upload Scan
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setScannerError(null);
+    try {
+      const dummyId = "qr-file-dummy";
+      const fileScanner = new Html5Qrcode(dummyId);
+      const result = await fileScanner.scanFile(file, true);
+      handleScanSuccess(result);
+    } catch (err: any) {
+      setScannerError("No readable QR code found in this image. Try another photo.");
     }
   };
 
@@ -143,38 +159,22 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
     };
   }, [isOpen, activeTab]);
 
-  // Handle Image File Upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setScannerError(null);
-
-    try {
-      const html5Qr = new Html5Qrcode("qr-file-dummy");
-      const decodedText = await html5Qr.scanFile(file, true);
-      handleScanSuccess(decodedText);
-    } catch (err: any) {
-      setScannerError("Could not find a valid QR code in this image. Please try another photo.");
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/75 p-4 backdrop-blur-md">
-      <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-slate-700 bg-slate-900 text-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-violet-950/80 p-4 backdrop-blur-md">
+      <div className="relative w-full max-w-xl overflow-hidden rounded-3xl border border-violet-800/60 bg-slate-900 text-white shadow-2xl">
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 p-5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+        <div className="flex items-center justify-between border-b border-slate-800 bg-slate-950/80 px-6 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600/30 text-amber-300 border border-amber-400/30">
               <Scan className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-white">Office Door QR Scanner</h2>
-              <p className="text-xs text-slate-400">Scan physical door placard to see live faculty status</p>
+              <h3 className="text-base font-bold text-white tracking-tight">Faculty Office Door Scanner</h3>
+              <p className="text-[11px] text-amber-200/80">Scan physical door placard to inspect real-time availability</p>
             </div>
           </div>
-
           <button
             onClick={() => {
               stopCamera();
@@ -193,12 +193,12 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
             onClick={() => setActiveTab("placards")}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 transition ${
               activeTab === "placards"
-                ? "bg-indigo-600 text-white shadow"
+                ? "bg-violet-700 text-white shadow-md shadow-violet-950/50"
                 : "text-slate-400 hover:text-white"
             }`}
           >
-            <Sparkles className="h-4 w-4 text-amber-400" />
-            <span>Interactive Placards</span>
+            <Sparkles className="h-4 w-4 text-amber-300" />
+            <span>Sample Placards</span>
           </button>
 
           <button
@@ -206,7 +206,7 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
             onClick={() => setActiveTab("camera")}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 transition ${
               activeTab === "camera"
-                ? "bg-indigo-600 text-white shadow"
+                ? "bg-violet-700 text-white shadow-md shadow-violet-950/50"
                 : "text-slate-400 hover:text-white"
             }`}
           >
@@ -219,7 +219,7 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
             onClick={() => setActiveTab("upload")}
             className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 transition ${
               activeTab === "upload"
-                ? "bg-indigo-600 text-white shadow"
+                ? "bg-violet-700 text-white shadow-md shadow-violet-950/50"
                 : "text-slate-400 hover:text-white"
             }`}
           >
@@ -230,28 +230,28 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
 
         {/* Success Confirmation Overlay */}
         {scannedResult && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-slate-950/90 p-6 text-center backdrop-blur-sm animate-in fade-in">
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-slate-950/95 p-6 text-center backdrop-blur-md animate-in fade-in">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
               <CheckCircle2 className="h-10 w-10 animate-bounce" />
             </div>
-            <h3 className="mt-4 text-lg font-bold text-white">QR Placard Detected!</h3>
-            <p className="mt-1 font-mono text-xs text-emerald-400">{scannedResult}</p>
-            <p className="mt-3 text-xs text-slate-400">Opening faculty status dashboard…</p>
+            <h3 className="mt-4 text-lg font-bold text-white">QR Placard Detected</h3>
+            <p className="mt-1 font-mono text-xs text-amber-300">{scannedResult}</p>
+            <p className="mt-3 text-xs text-slate-400">Opening faculty status dashboard...</p>
           </div>
         )}
 
         {/* Modal Body */}
         <div className="p-6">
-          {/* TAB 1: INTERACTIVE FAKE QR PLACARDS (Most useful for testing without webcam) */}
+          {/* TAB 1: SAMPLE QR PLACARDS */}
           {activeTab === "placards" && (
             <div className="space-y-4">
-              <div className="rounded-xl border border-indigo-900/50 bg-indigo-950/40 p-3 text-xs text-indigo-300">
+              <div className="rounded-xl border border-violet-800/50 bg-violet-950/40 p-3 text-xs text-violet-200">
                 <p className="font-semibold text-white flex items-center gap-1.5">
-                  <Sparkles className="h-4 w-4 text-amber-400" />
-                  <span>Interactive Campus Placards:</span>
+                  <Sparkles className="h-4 w-4 text-amber-300" />
+                  <span>Campus Door Placard Simulator:</span>
                 </p>
-                <p className="mt-1 text-[11px] leading-relaxed">
-                  Click any placard below to simulate scanning the permanent physical sign outside that professor's office door:
+                <p className="mt-1 text-[11px] leading-relaxed text-slate-300">
+                  Select any placard below to simulate scanning the permanent physical sign outside that professor's office door:
                 </p>
               </div>
 
@@ -260,7 +260,7 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
                 <button
                   type="button"
                   onClick={() => handleScanSuccess("qr-elena-rivera-demo")}
-                  className="group flex flex-col items-start rounded-2xl border border-slate-700 bg-slate-800/80 p-4 text-left transition hover:border-emerald-500 hover:bg-slate-800 hover:shadow-lg hover:shadow-emerald-950/50"
+                  className="group flex flex-col items-start rounded-2xl border border-slate-700 bg-slate-800/80 p-4 text-left transition hover:border-violet-400 hover:bg-slate-800 hover:shadow-lg hover:shadow-violet-950/50"
                 >
                   <div className="flex w-full items-center justify-between">
                     <span className="rounded-md bg-emerald-950 border border-emerald-700/50 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
@@ -276,16 +276,17 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
                       className="h-14 w-14 rounded-lg bg-white p-1 border border-slate-600 transition group-hover:scale-105"
                     />
                     <div>
-                      <h4 className="text-sm font-bold text-white group-hover:text-emerald-300 transition">
+                      <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
                         Dr. Elena Rivera
                       </h4>
                       <p className="text-xs text-slate-400">Associate Professor</p>
-                      <p className="text-[11px] text-indigo-400 font-medium">Ada Lovelace Hall · 204</p>
+                      <p className="text-[11px] text-violet-300 font-medium">Ada Lovelace Hall · 204</p>
                     </div>
                   </div>
 
-                  <div className="mt-3 w-full rounded-xl bg-slate-900/80 py-1.5 text-center text-[11px] font-semibold text-emerald-400 border border-slate-700/50 group-hover:bg-emerald-600 group-hover:text-white transition">
-                    👉 Simulate Door Scan
+                  <div className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-slate-900/80 py-1.5 text-center text-[11px] font-semibold text-amber-300 border border-slate-700/50 group-hover:bg-violet-700 group-hover:text-white transition">
+                    <span>Simulate Door Scan</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </div>
                 </button>
 
@@ -293,30 +294,31 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
                 <button
                   type="button"
                   onClick={() => handleScanSuccess("/faculty/marcus-chen")}
-                  className="group flex flex-col items-start rounded-2xl border border-slate-700 bg-slate-800/80 p-4 text-left transition hover:border-amber-500 hover:bg-slate-800 hover:shadow-lg hover:shadow-amber-950/50"
+                  className="group flex flex-col items-start rounded-2xl border border-slate-700 bg-slate-800/80 p-4 text-left transition hover:border-amber-400 hover:bg-slate-800 hover:shadow-lg hover:shadow-amber-950/50"
                 >
                   <div className="flex w-full items-center justify-between">
-                    <span className="rounded-md bg-amber-950 border border-amber-700/50 px-2 py-0.5 text-[10px] font-bold text-amber-400">
+                    <span className="rounded-md bg-amber-950 border border-amber-700/50 px-2 py-0.5 text-[10px] font-bold text-amber-300">
                       EXPIRED STATUS DEMO
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono">Room 311</span>
                   </div>
 
                   <div className="mt-3 flex items-center gap-3">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-900 border border-slate-700 font-bold text-amber-400">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-slate-900 border border-slate-700 font-bold text-amber-300">
                       <QrCode className="h-8 w-8" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition">
+                      <h4 className="text-sm font-bold text-white group-hover:text-amber-200 transition">
                         Dr. Marcus Chen
                       </h4>
                       <p className="text-xs text-slate-400">Assistant Professor</p>
-                      <p className="text-[11px] text-amber-400 font-medium">Ada Lovelace Hall · 311</p>
+                      <p className="text-[11px] text-amber-300/90 font-medium">Ada Lovelace Hall · 311</p>
                     </div>
                   </div>
 
-                  <div className="mt-3 w-full rounded-xl bg-slate-900/80 py-1.5 text-center text-[11px] font-semibold text-amber-400 border border-slate-700/50 group-hover:bg-amber-600 group-hover:text-white transition">
-                    👉 Simulate Door Scan
+                  <div className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-slate-900/80 py-1.5 text-center text-[11px] font-semibold text-amber-300 border border-slate-700/50 group-hover:bg-amber-600 group-hover:text-white transition">
+                    <span>Simulate Door Scan</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
                   </div>
                 </button>
 
@@ -327,7 +329,7 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
                   className="group flex flex-col items-start rounded-2xl border border-slate-700 bg-slate-800/80 p-4 text-left transition hover:border-rose-500 hover:bg-slate-800 hover:shadow-lg hover:shadow-rose-950/50 sm:col-span-2"
                 >
                   <div className="flex w-full items-center justify-between">
-                    <span className="rounded-md bg-rose-950 border border-rose-700/50 px-2 py-0.5 text-[10px] font-bold text-rose-400">
+                    <span className="rounded-md bg-rose-950 border border-rose-700/50 px-2 py-0.5 text-[10px] font-bold text-rose-300">
                       REVOKED PLACARD DEMO
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono">Token: qr-marcus-chen-revoked</span>
@@ -337,11 +339,12 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
                     <div>
                       <h4 className="text-xs font-bold text-white">Decommissioned Office Placard</h4>
                       <p className="text-[11px] text-slate-400">
-                        Tests how the app handles a retired or stolen door sign gracefully.
+                        Tests how the app handles a retired or decommissioned door sign gracefully.
                       </p>
                     </div>
-                    <span className="text-xs font-semibold text-rose-400 group-hover:underline">
-                      Simulate Scan →
+                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-300 group-hover:underline">
+                      <span>Simulate Scan</span>
+                      <ArrowRight className="h-3 w-3" />
                     </span>
                   </div>
                 </button>
@@ -354,12 +357,12 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
                   placeholder="Or enter QR token directly (e.g. qr-elena-rivera-demo)..."
                   value={manualToken}
                   onChange={(e) => setManualToken(e.target.value)}
-                  className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+                  className="flex-1 rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-violet-500 focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => manualToken && handleScanSuccess(manualToken)}
-                  className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-700 transition"
+                  className="rounded-xl bg-violet-700 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-600 transition"
                 >
                   Go
                 </button>
@@ -377,10 +380,10 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
               )}
 
               {/* Viewport for Html5Qrcode */}
-              <div className="relative mx-auto h-64 w-64 overflow-hidden rounded-2xl border-2 border-dashed border-indigo-500 bg-black">
+              <div className="relative mx-auto h-64 w-64 overflow-hidden rounded-2xl border-2 border-dashed border-violet-500 bg-black">
                 <div id={readerElementId} className="h-full w-full" />
                 {/* Laser animation */}
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_12px_#34d399] animate-pulse" />
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent shadow-[0_0_12px_#d4af37] animate-pulse" />
               </div>
 
               <p className="text-xs text-slate-400">
@@ -409,8 +412,8 @@ export function QrScannerModal({ isOpen, onClose }: QrScannerModalProps) {
                 </div>
               )}
 
-              <label className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950 hover:border-indigo-500 hover:bg-slate-900/80 transition">
-                <Upload className="h-8 w-8 text-indigo-400" />
+              <label className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-700 bg-slate-950 hover:border-violet-500 hover:bg-slate-900/80 transition">
+                <Upload className="h-8 w-8 text-amber-300" />
                 <span className="mt-2 text-xs font-semibold text-white">Click to upload QR image</span>
                 <span className="mt-1 text-[11px] text-slate-500">Supports PNG, JPG, WebP</span>
                 <input

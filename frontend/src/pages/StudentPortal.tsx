@@ -3,10 +3,13 @@ import { Link } from "react-router-dom";
 import {
   Bookmark,
   Calendar,
+  Clock,
+  MapPin,
   Trash2,
   Users,
   XCircle,
 } from "lucide-react";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatusBadge } from "@/components/StatusBadge";
 import { api } from "@/lib/api";
 import type { FacultyStatus } from "@wimp/shared";
@@ -39,67 +42,76 @@ export function StudentPortal() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-20 pt-6">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
-            Student Consultation & Bookmark Portal
-          </h1>
-          <p className="mt-1 text-sm text-slate-600">
-            Track your bookmarked professors' availability and manage your consultation appointments.
-          </p>
-        </div>
-
-        <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
-          {/* Left Column: Bookmarked Faculty */}
-          <div className="lg:col-span-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <div className="flex items-center gap-2">
-                <Bookmark className="h-5 w-5 text-amber-500 fill-amber-500" />
-                <h2 className="text-lg font-bold text-slate-900">Bookmarked Faculty</h2>
+    <DashboardLayout
+      title="Student Consultation &amp; Saved Faculty"
+      subtitle="Track your bookmarked professors' availability and manage your office hour consultation appointments."
+      actions={
+        <Link
+          to="/directory"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-violet-900 px-4 py-2 text-xs font-bold text-white shadow-md shadow-violet-950/20 hover:bg-violet-800 transition"
+        >
+          <Users className="h-3.5 w-3.5 text-amber-300" />
+          <span>Find Faculty</span>
+        </Link>
+      }
+    >
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* PANEL 1: BOOKMARKED FACULTY (6 cols) */}
+        <div className="lg:col-span-6 space-y-4">
+          <div className="rounded-3xl border border-violet-100 bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-violet-100 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-900 border border-amber-300/60">
+                  <Bookmark className="h-5 w-5 fill-amber-500 text-amber-600" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-violet-950">Bookmarked Faculty Radar</h2>
+                  <p className="text-[11px] text-slate-500">Real-time status beacons for your professors</p>
+                </div>
               </div>
               <Link
                 to="/directory"
-                className="text-xs font-semibold text-indigo-600 hover:underline"
+                className="text-xs font-bold text-violet-800 hover:text-violet-950 hover:underline"
               >
-                + Add more from Directory
+                + Add from Directory
               </Link>
             </div>
 
-            {favLoading ? (
-              <div className="p-8 text-center text-xs text-slate-400">Loading bookmarks…</div>
-            ) : !favData?.favorites || favData.favorites.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                <Users className="mx-auto h-10 w-10 text-slate-300" />
-                <p className="mt-2 text-sm font-semibold text-slate-700">No faculty saved yet</p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Save professors from the directory to track their office door status quickly.
-                </p>
-                <Link
-                  to="/directory"
-                  className="mt-4 inline-block rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800"
-                >
-                  Browse Directory
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {favData.favorites.map((prof) => (
+            <div className="mt-4 space-y-3">
+              {favLoading ? (
+                <div className="p-8 text-center text-xs text-slate-400">Loading bookmarks...</div>
+              ) : !favData?.favorites || favData.favorites.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-violet-200 bg-violet-50/30 p-8 text-center">
+                  <Users className="mx-auto h-10 w-10 text-violet-300" />
+                  <p className="mt-2 text-sm font-bold text-slate-700">No faculty saved yet</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Save professors from the directory to track their office door status quickly.
+                  </p>
+                  <Link
+                    to="/directory"
+                    className="mt-4 inline-block rounded-xl bg-violet-900 px-4 py-2 text-xs font-bold text-white hover:bg-violet-800 transition"
+                  >
+                    Browse Directory
+                  </Link>
+                </div>
+              ) : (
+                favData.favorites.map((prof) => (
                   <div
                     key={prof.id}
-                    className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+                    className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-2xs transition hover:border-violet-300 hover:shadow-xs"
                   >
                     <div>
                       <Link
                         to={prof.activeQrToken ? `/qr/${prof.activeQrToken}` : `/faculty/${prof.slug}`}
-                        className="font-bold text-slate-900 hover:text-indigo-600 transition"
+                        className="font-bold text-violet-950 hover:text-violet-700 transition text-sm"
                       >
                         {prof.displayName}
                       </Link>
                       <p className="text-xs text-slate-500">
                         {prof.designation} · {prof.department.code}
                       </p>
-                      <div className="mt-2">
+
+                      <div className="mt-2 flex items-center gap-2">
                         <StatusBadge
                           status={prof.currentStatus.status as FacultyStatus}
                           isExpired={prof.currentStatus.isExpired}
@@ -107,103 +119,122 @@ export function StudentPortal() {
                           size="sm"
                         />
                       </div>
+
+                      {prof.office && (
+                        <p className="mt-2 text-xs text-slate-600 flex items-center gap-1 font-medium">
+                          <MapPin className="h-3 w-3 text-amber-600" />
+                          <span>{prof.office.buildingName} · Room {prof.office.room}</span>
+                        </p>
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <Link
-                        to={prof.activeQrToken ? `/qr/${prof.activeQrToken}` : `/faculty/${prof.slug}`}
-                        className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-800 hover:bg-slate-200 transition"
-                      >
-                        Door Placard
-                      </Link>
+                    <div className="flex flex-col items-end gap-2">
                       <button
+                        type="button"
                         onClick={() => removeFavMutation.mutate(prof.id)}
                         className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
                         title="Remove bookmark"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
+
+                      <Link
+                        to={prof.activeQrToken ? `/qr/${prof.activeQrToken}` : `/faculty/${prof.slug}`}
+                        className="rounded-xl bg-violet-50 border border-violet-200/60 px-3 py-1 text-xs font-bold text-violet-900 hover:bg-violet-100 transition"
+                      >
+                        View Placard
+                      </Link>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
+        </div>
 
-          {/* Right Column: Consultation Requests */}
-          <div className="lg:col-span-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-indigo-600" />
-                <h2 className="text-lg font-bold text-slate-900">My Consultation Requests</h2>
+        {/* PANEL 2: CONSULTATION APPOINTMENTS (6 cols) */}
+        <div className="lg:col-span-6 space-y-4">
+          <div className="rounded-3xl border border-violet-100 bg-white p-6 shadow-xs">
+            <div className="flex items-center justify-between border-b border-violet-100 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-100 text-violet-900">
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-violet-950">My Office Consultations</h2>
+                  <p className="text-[11px] text-slate-500">Upcoming appointments and request status</p>
+                </div>
               </div>
-              <span className="rounded-full bg-slate-200 px-2.5 py-0.5 text-xs font-bold text-slate-800">
-                {meetingsData?.meetings.length ?? 0}
+
+              <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-bold text-violet-900 border border-violet-200">
+                {meetingsData?.meetings?.length || 0} Bookings
               </span>
             </div>
 
-            {meetingsLoading ? (
-              <div className="p-8 text-center text-xs text-slate-400">Loading requests…</div>
-            ) : !meetingsData?.meetings || meetingsData.meetings.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-                <Calendar className="mx-auto h-10 w-10 text-slate-300" />
-                <p className="mt-2 text-sm font-semibold text-slate-700">No meeting requests</p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  You can request a meeting directly from any professor's QR door page or directory card.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {meetingsData.meetings.map((m) => (
+            <div className="mt-4 space-y-3">
+              {meetingsLoading ? (
+                <div className="p-8 text-center text-xs text-slate-400">Loading requests...</div>
+              ) : !meetingsData?.meetings || meetingsData.meetings.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center">
+                  <Calendar className="mx-auto h-10 w-10 text-slate-300" />
+                  <p className="mt-2 text-sm font-bold text-slate-700">No consultations booked</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Search for a professor and submit an appointment request during their office hours.
+                  </p>
+                </div>
+              ) : (
+                meetingsData.meetings.map((m) => (
                   <div
                     key={m.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                    className="rounded-2xl border border-slate-200 bg-slate-50/50 p-4 transition hover:border-violet-200"
                   >
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start justify-between">
                       <div>
-                        <p className="font-bold text-sm text-slate-900">{m.reason}</p>
-                        <p className="text-xs text-slate-600">
-                          With: <strong className="text-indigo-900">{m.professorName}</strong>
+                        <h4 className="text-xs font-bold text-violet-950">{m.reason}</h4>
+                        <p className="text-xs text-slate-600 font-medium">
+                          Professor: {m.professorName}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {new Date(m.proposedStart).toLocaleDateString()} at{" "}
-                          {new Date(m.proposedStart).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        <p className="mt-1 text-xs text-violet-900 font-semibold flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-violet-700" />
+                          <span>
+                            {new Date(m.proposedStart).toLocaleDateString([], {
+                              weekday: "short",
+                              month: "short",
+                              day: "numeric",
+                            })}{" "}
+                            at{" "}
+                            {new Date(m.proposedStart).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
                         </p>
-                        {m.note && <p className="mt-1 text-xs italic text-slate-600">Note: "{m.note}"</p>}
+                        {m.note && (
+                          <p className="mt-2 text-[11px] text-slate-600 italic border-l-2 border-violet-400 pl-2">
+                            "{m.note}"
+                          </p>
+                        )}
                       </div>
 
                       <span
-                        className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                          m.status === "ACCEPTED"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : m.status === "DECLINED"
-                            ? "bg-rose-100 text-rose-800"
-                            : m.status === "CANCELLED"
-                            ? "bg-slate-100 text-slate-600"
-                            : "bg-amber-100 text-amber-800"
+                        className={`rounded-md px-2 py-0.5 text-[10px] font-bold ${
+                          m.status === "PENDING"
+                            ? "bg-amber-100 text-amber-900 border border-amber-300"
+                            : m.status === "ACCEPTED"
+                            ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                            : "bg-slate-100 text-slate-600"
                         }`}
                       >
                         {m.status}
                       </span>
                     </div>
 
-                    {/* Timeline of events if any */}
-                    {m.events && m.events.length > 0 && (
-                      <div className="mt-3 border-t border-slate-100 pt-2 text-[11px] text-slate-500">
-                        {m.events.map((e) => (
-                          <div key={e.id} className="flex items-center justify-between py-0.5">
-                            <span>Status transitioned to <strong>{e.toStatus}</strong></span>
-                            <span>{new Date(e.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
                     {m.status === "PENDING" && (
-                      <div className="mt-3 border-t border-slate-100 pt-2 flex justify-end">
+                      <div className="mt-3 flex justify-end border-t border-slate-200/60 pt-2">
                         <button
+                          type="button"
                           onClick={() => cancelMutation.mutate(m.id)}
-                          className="flex items-center gap-1 text-xs text-rose-600 hover:underline"
+                          className="flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:underline"
                         >
                           <XCircle className="h-3.5 w-3.5" />
                           <span>Cancel Request</span>
@@ -211,12 +242,12 @@ export function StudentPortal() {
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

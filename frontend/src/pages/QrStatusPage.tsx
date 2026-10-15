@@ -80,12 +80,12 @@ export function QrStatusPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl text-center space-y-4">
-          <div className="mx-auto h-16 w-16 animate-pulse rounded-full bg-slate-200" />
+        <div className="w-full max-w-md rounded-3xl border border-violet-100 bg-white p-8 shadow-xl text-center space-y-4">
+          <div className="mx-auto h-16 w-16 animate-pulse rounded-full bg-violet-100" />
           <div className="h-6 w-3/4 mx-auto animate-pulse rounded bg-slate-200" />
           <div className="h-4 w-1/2 mx-auto animate-pulse rounded bg-slate-100" />
           <div className="h-20 w-full animate-pulse rounded-2xl bg-slate-100" />
-          <p className="text-xs text-slate-400">Loading current office status…</p>
+          <p className="text-xs text-slate-400">Loading current office status...</p>
         </div>
       </div>
     );
@@ -105,7 +105,7 @@ export function QrStatusPage() {
           <div className="mt-6 flex flex-col gap-2">
             <Link
               to="/directory"
-              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-indigo-700"
+              className="rounded-xl bg-violet-900 px-4 py-2.5 text-sm font-semibold text-white shadow hover:bg-violet-800 transition"
             >
               Browse Faculty Directory
             </Link>
@@ -123,14 +123,14 @@ export function QrStatusPage() {
     return (
       <div className="flex min-h-[80vh] items-center justify-center p-4">
         <div className="w-full max-w-md rounded-3xl border border-amber-300 bg-white p-8 shadow-xl text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-700">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-800">
             <AlertTriangle className="h-8 w-8" />
           </div>
           <h2 className="mt-4 text-xl font-bold text-slate-900">QR Placard Deactivated</h2>
-          <p className="mt-1 text-sm font-medium text-amber-800">
+          <p className="mt-1 text-sm font-medium text-amber-900">
             {data.professor.displayName} ({data.professor.department.name})
           </p>
-          <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 text-left text-xs text-amber-900">
+          <div className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-left text-xs text-amber-900">
             <p className="font-semibold">Placard Status: Revoked</p>
             <p className="mt-1">
               This physical door QR code was revoked or replaced. Please search the official faculty directory to locate the professor's current office assignment.
@@ -139,7 +139,7 @@ export function QrStatusPage() {
           <div className="mt-6">
             <Link
               to="/directory"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-950 px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-violet-900 transition"
             >
               Search Directory
             </Link>
@@ -175,7 +175,7 @@ export function QrStatusPage() {
       <div className="mx-auto max-w-xl px-4 flex items-center justify-between no-print">
         <Link
           to="/directory"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-violet-900 transition"
         >
           <ArrowLeft className="h-4 w-4" />
           <span>Faculty Directory</span>
@@ -183,21 +183,21 @@ export function QrStatusPage() {
         <button
           onClick={() => refetch()}
           disabled={isFetching}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-sm hover:bg-violet-50/50 hover:text-violet-900 transition"
         >
-          <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin text-indigo-600" : ""}`} />
-          <span>{isFetching ? "Refreshing…" : "Live Refresh"}</span>
+          <RefreshCw className={`h-3 w-3 ${isFetching ? "animate-spin text-violet-700" : ""}`} />
+          <span>{isFetching ? "Refreshing..." : "Live Refresh"}</span>
         </button>
       </div>
 
       {/* Main Status Card */}
       <main className="mx-auto mt-3 max-w-xl px-4">
-        <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xl shadow-slate-200/50">
+        <div className="overflow-hidden rounded-3xl border border-violet-100 bg-white shadow-xl shadow-violet-950/5">
           {/* Header Banner */}
-          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 text-white sm:p-8">
+          <div className="bg-gradient-to-r from-violet-950 via-purple-900 to-violet-950 p-6 text-white sm:p-8 border-b border-amber-400/20">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-2xl font-bold text-white shadow-inner backdrop-blur-md">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-2xl font-bold text-amber-300 border border-amber-400/30 shadow-inner backdrop-blur-md">
                   {professor.displayName
                     .split(" ")
                     .filter((p: string) => !p.startsWith("Dr."))
@@ -209,12 +209,12 @@ export function QrStatusPage() {
                   <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
                     {professor.displayName}
                   </h1>
-                  <p className="text-xs text-indigo-200 font-medium sm:text-sm">
+                  <p className="text-xs text-amber-200/90 font-medium sm:text-sm">
                     {professor.designation} · {professor.department.name}
                   </p>
                   {professor.office ? (
-                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs text-slate-200 backdrop-blur-sm">
-                      <MapPin className="h-3.5 w-3.5 text-indigo-400" />
+                    <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs text-slate-200 backdrop-blur-sm border border-white/10">
+                      <MapPin className="h-3.5 w-3.5 text-amber-300" />
                       <span>
                         {professor.office.buildingName} · Floor {professor.office.floor} · Room {professor.office.room}
                       </span>
@@ -242,7 +242,7 @@ export function QrStatusPage() {
           {/* Status Section */}
           <div className="p-6 sm:p-8 space-y-6">
             {/* Primary Live Status Display */}
-            <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5 shadow-sm">
+            <div className="rounded-2xl border border-violet-100 bg-slate-50/70 p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
                   Current Published Status
@@ -278,11 +278,12 @@ export function QrStatusPage() {
                 </div>
               )}
 
-              {/* PROMINENT: RIGHT WHERE IS HE / SHE RIGHT NOW */}
-              <div className="mt-4 overflow-hidden rounded-2xl border-2 border-slate-900 bg-slate-900 text-white p-5 shadow-md">
+              {/* PROMINENT: CURRENT PHYSICAL LOCATION */}
+              <div className="mt-4 overflow-hidden rounded-2xl border-2 border-violet-900 bg-violet-950 text-white p-5 shadow-md">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400">
-                    📍 Current Physical Location
+                  <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-amber-300">
+                    <MapPin className="h-3.5 w-3.5 text-amber-300" />
+                    <span>Current Physical Location</span>
                   </span>
                   <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
                     <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
@@ -296,7 +297,7 @@ export function QrStatusPage() {
                       <p className="text-xl font-black text-white">
                         In Office: {professor.office ? `${professor.office.buildingName} · Room ${professor.office.room}` : "Campus Office"}
                       </p>
-                      <p className="mt-1 text-xs text-slate-300">
+                      <p className="mt-1 text-xs text-violet-200/90">
                         Door open for student drop-ins and quick questions.
                       </p>
                     </div>
@@ -360,8 +361,8 @@ export function QrStatusPage() {
 
                 {/* Return Countdown / Target */}
                 {status.expectedReturnAt && (
-                  <div className="mt-3 flex items-center justify-between border-t border-slate-800 pt-3 text-xs">
-                    <span className="text-slate-400">Expected return to office:</span>
+                  <div className="mt-3 flex items-center justify-between border-t border-violet-800/80 pt-3 text-xs">
+                    <span className="text-slate-300">Expected return to office:</span>
                     <strong className="font-bold text-amber-300">{returnTimeLabel}</strong>
                   </div>
                 )}
@@ -377,18 +378,18 @@ export function QrStatusPage() {
 
               {/* Public Message */}
               {status.publicMessage && (
-                <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3.5 text-xs text-slate-700">
+                <div className="mt-3 rounded-xl border border-violet-100 bg-white p-3.5 text-xs text-slate-700">
                   <p className="font-semibold text-slate-900 text-[11px] uppercase tracking-wider">Note from Professor:</p>
-                  <p className="mt-1 italic">"{status.publicMessage}"</p>
+                  <p className="mt-1 italic text-slate-600">"{status.publicMessage}"</p>
                 </div>
               )}
             </div>
 
             {/* Office Hours Section */}
             {officeHours && officeHours.length > 0 && (
-              <div className="rounded-2xl border border-slate-200 p-5 bg-white">
+              <div className="rounded-2xl border border-violet-100 p-5 bg-white shadow-2xs">
                 <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-                  <Calendar className="h-4 w-4 text-indigo-600" />
+                  <Calendar className="h-4 w-4 text-violet-700" />
                   <span>Posted Consultation Hours</span>
                 </div>
                 <div className="mt-3 divide-y divide-slate-100 text-xs">
@@ -408,15 +409,15 @@ export function QrStatusPage() {
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => setShowConsultModal(true)}
-                className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-xs font-bold text-white shadow-md shadow-indigo-600/20 hover:bg-indigo-700 transition"
+                className="flex items-center justify-center gap-2 rounded-xl bg-violet-900 py-3 text-xs font-bold text-white shadow-md shadow-violet-950/20 hover:bg-violet-800 transition"
               >
-                <Calendar className="h-4 w-4" />
+                <Calendar className="h-4 w-4 text-amber-300" />
                 <span>Request Meeting</span>
               </button>
 
               <Link
                 to={`/qr/${token || data.token}/print`}
-                className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white py-3 text-xs font-bold text-slate-800 shadow-sm hover:bg-slate-50 transition"
+                className="flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white py-3 text-xs font-bold text-slate-800 shadow-sm hover:bg-violet-50/50 hover:text-violet-950 transition"
               >
                 <Printer className="h-4 w-4 text-slate-600" />
                 <span>Print Door Sign</span>
@@ -426,7 +427,7 @@ export function QrStatusPage() {
             <div className="flex items-center justify-center gap-4 text-xs">
               <button
                 onClick={handleCopyLink}
-                className="inline-flex items-center gap-1 text-slate-500 hover:text-indigo-600 transition"
+                className="inline-flex items-center gap-1 text-slate-500 hover:text-violet-900 transition"
               >
                 <Share2 className="h-3.5 w-3.5" />
                 <span>{copySuccess ? "Link copied!" : "Share QR status link"}</span>
@@ -434,9 +435,9 @@ export function QrStatusPage() {
             </div>
 
             {/* Ethical Disclaimer */}
-            <div className="rounded-xl border border-slate-100 bg-slate-50/80 p-3.5 text-[11px] leading-relaxed text-slate-500">
+            <div className="rounded-xl border border-violet-100 bg-slate-50/80 p-3.5 text-[11px] leading-relaxed text-slate-500">
               <div className="flex items-start gap-2">
-                <Info className="h-3.5 w-3.5 text-slate-400 mt-0.5 shrink-0" />
+                <Info className="h-3.5 w-3.5 text-violet-600 mt-0.5 shrink-0" />
                 <p>
                   <strong>Self-Reported Availability:</strong> This information is published directly by faculty members. The system does not claim or use automated physical location tracking.
                 </p>
