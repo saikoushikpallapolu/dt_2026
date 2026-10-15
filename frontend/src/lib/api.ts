@@ -271,6 +271,23 @@ export const api = {
     return request("/admin/audit-logs");
   },
 
+  // Automation
+  async triggerAutomationSync(options?: { simulatedTime?: string; professorId?: string }): Promise<{
+    ok: boolean;
+    message: string;
+    appliedCount: number;
+    changes: any[];
+  }> {
+    return request("/faculty/automate-sync", {
+      method: "POST",
+      body: JSON.stringify(options || {}),
+    });
+  },
+
+  async getMySchedules(): Promise<{ classes: any[]; officeHours: any[] }> {
+    return request("/faculty/me/schedules");
+  },
+
   // Meta
   async fetchMeta(): Promise<any> {
     return request("/meta");

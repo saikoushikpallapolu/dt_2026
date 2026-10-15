@@ -51,19 +51,26 @@ export function HomePage() {
           {/* Quick Action Buttons */}
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
-              to="/qr/qr-elena-rivera-demo"
+              to="/scan"
               className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700 transition"
             >
               <QrCode className="h-5 w-5" />
-              <span>Scan Demo Door Placard</span>
+              <span>📷 Open Live QR Scanner</span>
+            </Link>
+
+            <Link
+              to="/qr/qr-elena-rivera-demo"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3.5 text-sm font-bold text-slate-800 shadow-sm hover:bg-slate-50 transition"
+            >
+              <span>View Sample Door Placard</span>
             </Link>
 
             <Link
               to="/directory"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-800 shadow-sm hover:bg-slate-50 transition"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3.5 text-sm font-bold text-slate-800 shadow-sm hover:bg-slate-50 transition"
             >
               <Users className="h-5 w-5 text-slate-500" />
-              <span>Search Faculty Directory</span>
+              <span>Search Directory</span>
             </Link>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { FacultyStatus, MeetingRequestStatus } from "@prisma/client";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { formatStatusDetail, updateProfessorStatus } from "../services/status-service.js";
+import { runAutomationSync, FACULTY_CLASS_SCHEDULES } from "../services/automation-service.js";
 import type { AppEnv } from "../config/env.js";
 
 const updateStatusSchema = z.object({
@@ -622,6 +623,55 @@ export function createFacultyRouter(appEnv: AppEnv): Router {
           endTime: oh.endTime,
           notes: oh.notes,
         })),
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  // ----------------------------------------------------
+  // AUTOMATION ROUTES
+  // ----------------------------------------------------
+
+  router.post("/automate-sync", async (req, res, next) => {
+    try {
+      const simulatedTime = req.body.simulatedTime ? new Date(req.body.simulatedTime) : undefined;
+      const professorId = req.body.professorId || undefined;
+
+      const result = await runAutomationSync(appEnv, {
+        simulatedTime,
+        professorId,
+      });
+
+      res.json({
+        ok: true,
+        message: `Automation check completed: ${result.appliedCount} status update(s) applied.`,
+        ...result,
+      });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  router.get("/me/schedules", requireAuth, requireRole("PROFESSOR"), async (req, res, next) => {
+    try {
+      const professor = await prisma.professor.findUnique({
+        where: { userId: req.user!.id },
+        include: {
+          officeHours: { orderBy: [{ dayOfWeek: "asc" }, { startTime: "asc" }] },
+        },
+      });
+
+      if (!professor) {
+        res.status(404).json({ error: { code: "NOT_FOUND", message: "Professor not found" } });
+        return;
+      }
+
+      const classes = FACULTY_CLASS_SCHEDULES.filter((cls) => cls.professorSlug === professor.slug);
+
+      res.json({
+        classes,
+        officeHours: professor.officeHours,
       });
     } catch (err) {
       next(err);

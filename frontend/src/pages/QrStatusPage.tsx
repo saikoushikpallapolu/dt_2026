@@ -8,7 +8,6 @@ import {
   BookmarkCheck,
   Building2,
   Calendar,
-  Clock,
   Info,
   MapPin,
   Printer,
@@ -279,13 +278,94 @@ export function QrStatusPage() {
                 </div>
               )}
 
-              {/* Expected Return Time */}
-              {status.expectedReturnAt && (
-                <div className="mt-4 flex items-center gap-2 rounded-xl bg-indigo-50/80 px-3.5 py-2.5 text-xs font-medium text-indigo-950 border border-indigo-100">
-                  <Clock className="h-4 w-4 text-indigo-600 shrink-0" />
-                  <span>Expected back at: <strong className="font-bold text-indigo-900">{returnTimeLabel}</strong></span>
+              {/* PROMINENT: RIGHT WHERE IS HE / SHE RIGHT NOW */}
+              <div className="mt-4 overflow-hidden rounded-2xl border-2 border-slate-900 bg-slate-900 text-white p-5 shadow-md">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-400">
+                    📍 Current Physical Location
+                  </span>
+                  <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
+                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+                    <span>Real-Time Self-Reported</span>
+                  </span>
                 </div>
-              )}
+
+                <div className="mt-2.5">
+                  {status.status === "AVAILABLE" && (
+                    <div>
+                      <p className="text-xl font-black text-white">
+                        In Office: {professor.office ? `${professor.office.buildingName} · Room ${professor.office.room}` : "Campus Office"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-300">
+                        Door open for student drop-ins and quick questions.
+                      </p>
+                    </div>
+                  )}
+
+                  {status.status === "IN_CLASS" && (
+                    <div>
+                      <p className="text-xl font-black text-amber-300">
+                        In Class: {status.alternateLocation || "Campus Lecture Hall"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-300">
+                        {status.publicMessage || "Currently giving lecture. Please do not disturb during class."}
+                      </p>
+                    </div>
+                  )}
+
+                  {status.status === "IN_MEETING" && (
+                    <div>
+                      <p className="text-xl font-black text-purple-300">
+                        In Consultation: {professor.office ? `Room ${professor.office.room}` : "Meeting Room"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-300">
+                        Meeting in progress. Please wait outside or book a slot below.
+                      </p>
+                    </div>
+                  )}
+
+                  {status.status === "AWAY" && (
+                    <div>
+                      <p className="text-xl font-black text-sky-300">
+                        Stepped Away from Office
+                      </p>
+                      <p className="mt-1 text-xs text-slate-300">
+                        Briefly away from desk. Expected to return shortly.
+                      </p>
+                    </div>
+                  )}
+
+                  {status.status === "ON_LEAVE" && (
+                    <div>
+                      <p className="text-xl font-black text-slate-300">
+                        On Leave / Out of Campus Today
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        Please check posted consultation hours or email for inquiries.
+                      </p>
+                    </div>
+                  )}
+
+                  {status.status === "UNKNOWN" && (
+                    <div>
+                      <p className="text-xl font-black text-slate-300">
+                        Office: {professor.office ? `${professor.office.buildingName} · Room ${professor.office.room}` : "Unassigned"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-400">
+                        Awaiting latest availability confirmation from faculty member.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Return Countdown / Target */}
+                {status.expectedReturnAt && (
+                  <div className="mt-3 flex items-center justify-between border-t border-slate-800 pt-3 text-xs">
+                    <span className="text-slate-400">Expected return to office:</span>
+                    <strong className="font-bold text-amber-300">{returnTimeLabel}</strong>
+                  </div>
+                )}
+              </div>
 
               {/* Alternate Location Note */}
               {status.alternateLocation && (

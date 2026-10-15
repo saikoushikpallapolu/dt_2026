@@ -8,18 +8,21 @@ import {
   Compass,
   DoorOpen,
   LogOut,
+  Scan,
   Shield,
   User,
   Users,
 } from "lucide-react";
 import { DEMO_ACCOUNTS, useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import { QrScannerModal } from "./QrScannerModal";
 
 export function Navbar() {
   const { user, logout, quickSwitch } = useAuth();
   const navigate = useNavigate();
   const [showDemoMenu, setShowDemoMenu] = useState(false);
   const [showNotifMenu, setShowNotifMenu] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   const { data: notifData, refetch: refetchNotifs } = useQuery({
     queryKey: ["notifications", user?.id],
@@ -123,6 +126,14 @@ export function Navbar() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1 text-sm font-medium">
+            <button
+              onClick={() => setShowScanner(true)}
+              className="flex items-center gap-1.5 rounded-lg bg-indigo-50 border border-indigo-200/60 px-3 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-2xs mr-1"
+            >
+              <Scan className="h-3.5 w-3.5 text-indigo-600" />
+              <span>Scan Office QR</span>
+            </button>
+
             <Link
               to="/directory"
               className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition"
@@ -242,6 +253,8 @@ export function Navbar() {
           )}
         </div>
       </div>
+
+      <QrScannerModal isOpen={showScanner} onClose={() => setShowScanner(false)} />
     </header>
   );
 }

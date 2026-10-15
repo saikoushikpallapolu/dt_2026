@@ -9,6 +9,7 @@ import { LoginPage } from "@/pages/LoginPage";
 import { ProfessorDashboard } from "@/pages/ProfessorDashboard";
 import { StudentPortal } from "@/pages/StudentPortal";
 import { AdminDashboard } from "@/pages/AdminDashboard";
+import { ScanPage } from "@/pages/ScanPage";
 
 export function App() {
   return (
@@ -18,6 +19,7 @@ export function App() {
         <div className="flex-1">
           <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route path="/scan" element={<ScanPage />} />
             <Route path="/qr/:token" element={<QrStatusPage />} />
             <Route path="/qr/:token/print" element={<PrintSignPage />} />
             <Route path="/faculty/:slug" element={<QrStatusPage />} />

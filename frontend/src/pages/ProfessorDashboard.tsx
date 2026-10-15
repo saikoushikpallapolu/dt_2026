@@ -443,6 +443,119 @@ export function ProfessorDashboard() {
               </div>
             </div>
 
+            {/* Status Automation Engine Card */}
+            <div className="rounded-2xl border border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/50 p-6 shadow-sm">
+              <div className="flex items-center justify-between border-b border-indigo-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-indigo-600" />
+                  <h3 className="text-sm font-bold text-slate-900">Automated Status Engine</h3>
+                </div>
+                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800 border border-emerald-300">
+                  Worker Active (60s)
+                </span>
+              </div>
+
+              <p className="mt-2 text-xs text-slate-600 leading-relaxed">
+                Your availability can update automatically based on your teaching timetable and accepted consultation meetings without manual clicks.
+              </p>
+
+              <div className="mt-3 space-y-2 rounded-xl bg-white/90 p-3 text-xs border border-indigo-100">
+                <div className="flex items-center justify-between text-slate-700">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    Auto-sync with Class Timetable:
+                  </span>
+                  <span className="font-bold text-emerald-700">Enabled</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-700">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    Auto-sync with Consultations:
+                  </span>
+                  <span className="font-bold text-emerald-700">Enabled</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-700">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    Auto-reset when class concludes:
+                  </span>
+                  <span className="font-bold text-emerald-700">Enabled</span>
+                </div>
+              </div>
+
+              {/* Simulation triggers for testing */}
+              <div className="mt-4 border-t border-indigo-100 pt-3">
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                  Test / Simulate Automation:
+                </span>
+                <div className="mt-2 flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const res = await api.triggerAutomationSync();
+                      queryClient.invalidateQueries({ queryKey: ["professor-status"] });
+                      queryClient.invalidateQueries({ queryKey: ["professor-history"] });
+                      setStatusFeedback(res.message);
+                      setTimeout(() => setStatusFeedback(null), 4000);
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-indigo-300 bg-white py-2 text-xs font-semibold text-indigo-700 shadow-2xs hover:bg-indigo-50 transition"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-indigo-600" />
+                    <span>Run Automation Sync Check Now</span>
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        // Simulate Tuesday 10:30 AM (CS201 Lecture Time)
+                        const d = new Date();
+                        // Find closest Tuesday
+                        const dayDiff = (2 - d.getDay() + 7) % 7;
+                        const sim = new Date(d.getTime() + dayDiff * 24 * 60 * 60 * 1000);
+                        sim.setHours(10, 30, 0, 0);
+
+                        await api.triggerAutomationSync({
+                          simulatedTime: sim.toISOString(),
+                          professorId: statusData?.professorId,
+                        });
+                        queryClient.invalidateQueries({ queryKey: ["professor-status"] });
+                        queryClient.invalidateQueries({ queryKey: ["professor-history"] });
+                        setStatusFeedback(`Simulated CS201 class time (10:30 AM)! Status automatically flipped to IN_CLASS.`);
+                        setTimeout(() => setStatusFeedback(null), 5000);
+                      }}
+                      className="rounded-xl border border-amber-300 bg-amber-50/80 py-2 text-[11px] font-bold text-amber-900 hover:bg-amber-100 transition"
+                    >
+                      Simulate Class (10:30 AM)
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        // Simulate 11:35 AM (Class concluded)
+                        const d = new Date();
+                        const dayDiff = (2 - d.getDay() + 7) % 7;
+                        const sim = new Date(d.getTime() + dayDiff * 24 * 60 * 60 * 1000);
+                        sim.setHours(11, 35, 0, 0);
+
+                        await api.triggerAutomationSync({
+                          simulatedTime: sim.toISOString(),
+                          professorId: statusData?.professorId,
+                        });
+                        queryClient.invalidateQueries({ queryKey: ["professor-status"] });
+                        queryClient.invalidateQueries({ queryKey: ["professor-history"] });
+                        setStatusFeedback(`Simulated 11:35 AM! Status automatically reset to AVAILABLE.`);
+                        setTimeout(() => setStatusFeedback(null), 5000);
+                      }}
+                      className="rounded-xl border border-emerald-300 bg-emerald-50/80 py-2 text-[11px] font-bold text-emerald-900 hover:bg-emerald-100 transition"
+                    >
+                      Simulate After-Class (11:35 AM)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Status History Timeline */}
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
