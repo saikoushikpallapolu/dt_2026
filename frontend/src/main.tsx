@@ -5,7 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import "./index.css";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({ defaultOptions: { queries: { refetchInterval: 5000, retry: 1, staleTime: 1000 } } });
 
 const root = document.getElementById("root");
 if (!root) {

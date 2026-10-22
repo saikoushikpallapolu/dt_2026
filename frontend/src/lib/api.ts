@@ -10,7 +10,7 @@ import type {
   StatusDetail,
 } from "@wimp/shared";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const API_BASE_URL = "/api/v1";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
@@ -20,6 +20,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       "Content-Type": "application/json",
       ...(options.headers || {}),
     },
+    cache: "no-store",
     credentials: "include", // send cookies
   });
 
@@ -323,6 +324,9 @@ export const api = {
     return request("/faculty/me/schedules");
   },
 
+  async saveOfficeHours(officeHours: { dayOfWeek: number; startTime: string; endTime: string; notes?: string | null }[]): Promise<{ ok: boolean }> {
+    return request("/faculty/me/office-hours", { method: "PUT", body: JSON.stringify({ officeHours }) });
+  },
   // Meta
   async fetchMeta(): Promise<any> {
     return request("/meta");
