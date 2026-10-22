@@ -34,6 +34,8 @@ export function createMeetingsRouter(): Router {
       const start = new Date(proposedStart);
       const end = new Date(proposedEnd);
 
+      if (start <= new Date()) { res.status(400).json({ error: { code: "PAST_TIME", message: "Choose a future consultation time" } }); return; }
+
       if (end <= start) {
         res.status(400).json({
           error: {
@@ -49,7 +51,7 @@ export function createMeetingsRouter(): Router {
         include: { user: true },
       });
 
-      if (!professor) {
+      if (!professor || professor.visibility !== "PUBLIC" || !professor.user.isActive) {
         res.status(404).json({
           error: {
             code: "NOT_FOUND",

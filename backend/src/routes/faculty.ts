@@ -1,3 +1,4 @@
+import { publishCampusChange } from "../services/live-updates.js";
 import { Router } from "express";
 import { z } from "zod";
 import { FacultyStatus, MeetingRequestStatus } from "@prisma/client";
@@ -6,6 +7,8 @@ import { requireAuth, requireRole } from "../middleware/auth.js";
 import { formatStatusDetail, updateProfessorStatus } from "../services/status-service.js";
 import { runAutomationSync, FACULTY_CLASS_SCHEDULES } from "../services/automation-service.js";
 import type { AppEnv } from "../config/env.js";
+
+import { officeHoursSchema } from "../services/office-hours.js";
 
 const updateStatusSchema = z.object({
   status: z.nativeEnum(FacultyStatus),
@@ -60,9 +63,7 @@ export function createFacultyRouter(appEnv: AppEnv): Router {
       }
 
       if (statusFilter && Object.values(FacultyStatus).includes(statusFilter as FacultyStatus)) {
-        where.currentStatus = {
-          status: statusFilter as FacultyStatus,
-        };
+        where.currentStatus = { status: statusFilter as FacultyStatus, OR: [{ expiresAt: null }, { expiresAt: { gt: new Date() } }] };
       }
 
       const [total, professors] = await Promise.all([
@@ -406,6 +407,13 @@ export function createFacultyRouter(appEnv: AppEnv): Router {
           return;
         }
 
+        const action = parsed.data.action;
+        if ((action === 'COMPLETE' && request.status !== 'ACCEPTED') || (action !== 'COMPLETE' && !['PENDING', 'RESCHEDULE_PROPOSED'].includes(request.status))) {
+          res.status(409).json({ error: { code: 'INVALID_STATE', message: 'This request has already been processed. Refresh to see its current state.' } }); return;
+        }
+        if (action === 'PROPOSE_RESCHEDULE' && (!parsed.data.proposedStart || !parsed.data.proposedEnd || new Date(parsed.data.proposedStart) <= new Date() || new Date(parsed.data.proposedEnd) <= new Date(parsed.data.proposedStart))) {
+          res.status(400).json({ error: { code: 'INVALID_TIME_RANGE', message: 'Choose a valid future start and end time' } }); return;
+        }
         let targetStatus: MeetingRequestStatus;
         if (parsed.data.action === "ACCEPT") {
           targetStatus = MeetingRequestStatus.ACCEPTED;
@@ -495,6 +503,21 @@ export function createFacultyRouter(appEnv: AppEnv): Router {
   // ----------------------------------------------------
   // PUBLIC BY SLUG
   // ----------------------------------------------------
+
+  router.put("/me/office-hours", requireAuth, requireRole("PROFESSOR"), async (req, res, next) => {
+    try {
+      const parsed = officeHoursSchema.safeParse(req.body);
+      if (!parsed.success) { res.status(400).json({ error: { code: "VALIDATION_ERROR", message: parsed.error.issues[0].message } }); return; }
+      const professor = await prisma.professor.findUnique({ where: { userId: req.user!.id } });
+      if (!professor) { res.status(404).json({ error: { message: "Professor not found" } }); return; }
+      await prisma.$transaction(async tx => {
+        await tx.officeHour.deleteMany({ where: { professorId: professor.id } });
+        await tx.officeHour.createMany({ data: parsed.data.officeHours.map(slot => ({ ...slot, professorId: professor.id })) });
+      });
+      publishCampusChange();
+      res.json({ ok: true });
+    } catch (err) { next(err); }
+  });
 
   router.get("/:slug", async (req, res, next) => {
     try {
@@ -633,7 +656,7 @@ export function createFacultyRouter(appEnv: AppEnv): Router {
   // AUTOMATION ROUTES
   // ----------------------------------------------------
 
-  router.post("/automate-sync", async (req, res, next) => {
+  router.post("/automate-sync", requireAuth, requireRole("ADMINISTRATOR"), async (req, res, next) => {
     try {
       const simulatedTime = req.body.simulatedTime ? new Date(req.body.simulatedTime) : undefined;
       const professorId = req.body.professorId || undefined;
