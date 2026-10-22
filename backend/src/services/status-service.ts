@@ -1,3 +1,4 @@
+import { publishCampusChange } from "./live-updates.js";
 import {
   type FacultyStatus,
   type StatusDetail,
@@ -136,5 +137,6 @@ export async function updateProfessorStatus(input: UpdateStatusInput): Promise<S
     return currentStatus;
   });
 
+  publishCampusChange();
   return formatStatusDetail(result);
 }

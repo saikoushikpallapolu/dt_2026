@@ -1,3 +1,4 @@
+import { liveUpdates } from "./services/live-updates.js";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -32,6 +33,18 @@ export function createApp(appEnv: AppEnv) {
   app.use(cookieParser());
   app.use(authenticateSession);
 
+  app.use('/api/v1', (_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
+  app.get('/api/v1/events', (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.flushHeaders();
+    const send = () => res.write('event: campus-change\ndata: {}\n\n');
+    res.write('retry: 1000\nevent: connected\ndata: {}\n\n');
+    liveUpdates.on('change', send);
+    const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 15000);
+    req.on('close', () => { clearInterval(heartbeat); liveUpdates.off('change', send); });
+  });
   // Health and meta endpoints
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "where-is-my-professor-api" });

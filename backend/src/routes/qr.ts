@@ -144,6 +144,8 @@ export function createQrRouter(appEnv: AppEnv): Router {
   router.get("/:token/image", async (req, res, next) => {
     try {
       const { token } = req.params;
+      const storedQr = await prisma.qrCode.findUnique({ where: { token } });
+      if (!storedQr || !storedQr.isActive) { res.status(404).json({ error: { message: 'Active QR code not found' } }); return; }
       const originFromQuery = req.query.origin as string | undefined;
       let originFromHeader: string | null = null;
       try {
