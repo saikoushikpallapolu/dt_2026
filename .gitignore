@@ -15,3 +15,8 @@ backend/generated/
 frontend/dist/
 *.tsbuildinfo
 .pgdata/
+
+.demo-pgdata/
+artifacts/
+demo-output.log
+demo-error.log

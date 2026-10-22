@@ -14,7 +14,10 @@
     "db:up": "docker compose up -d",
     "db:migrate": "npm run prisma:migrate -w @wimp/backend",
     "db:seed": "npm run prisma:seed -w @wimp/backend",
-    "db:reset": "npm run prisma:reset -w @wimp/backend"
+    "db:reset": "npm run prisma:reset -w @wimp/backend",
+    "demo:seed": "tsx backend/prisma/demo.ts",
+    "demo": "node scripts/demo.mjs",
+    "demo:verify": "node scripts/verify-demo.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1",
