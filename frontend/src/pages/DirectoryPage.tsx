@@ -28,7 +28,7 @@ export function DirectoryPage() {
     queryFn: () => api.getDepartments(),
   });
 
-  const { data: facultyData, isLoading, refetch } = useQuery({
+  const { data: facultyData, isLoading, isError, refetch } = useQuery({
     queryKey: ["faculty-directory", search, selectedDept, selectedStatus],
     queryFn: () =>
       api.getFacultyList({
@@ -64,7 +64,7 @@ export function DirectoryPage() {
   return (
     <DashboardLayout
       title="Faculty Directory"
-      subtitle="Browse university professors, locate physical offices, and check real-time availability."
+      subtitle="Find the right person. Check their availability. Make your next conversation count."
       actions={
         <div className="text-xs font-semibold text-slate-500 bg-white border border-violet-100 px-3 py-1.5 rounded-xl shadow-2xs">
           Showing {facultyData?.items?.length || 0} Faculty Members
@@ -121,7 +121,7 @@ export function DirectoryPage() {
 
       {/* Results Grid */}
       <div className="mt-6">
-        {isLoading ? (
+        {isError ? <div role="alert" className="panel">Could not load faculty. <button onClick={() => refetch()}>Try again</button></div> : isLoading ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
               <div key={i} className="h-48 rounded-3xl border border-violet-100 bg-white p-6 shadow-xs animate-pulse" />
@@ -215,7 +215,7 @@ export function DirectoryPage() {
                     to={prof.activeQrToken ? `/qr/${prof.activeQrToken}` : `/faculty/${prof.slug}`}
                     className="flex-1 rounded-xl bg-violet-50 border border-violet-200/60 py-2 text-center text-xs font-bold text-violet-900 hover:bg-violet-100 transition"
                   >
-                    Door Placard
+                    View profile
                   </Link>
 
                   <button

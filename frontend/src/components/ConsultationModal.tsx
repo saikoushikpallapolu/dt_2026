@@ -41,7 +41,7 @@ export function ConsultationModal({
     setIsSubmitting(true);
 
     try {
-      const proposedStart = new Date(`${date}T${startTime}:00`);
+      const proposedStart = new Date(`${date}T${startTime}:00+05:30`);
       const proposedEnd = new Date(proposedStart.getTime() + durationMinutes * 60 * 1000);
 
       await api.requestMeeting({
@@ -80,7 +80,7 @@ export function ConsultationModal({
           Submit an appointment request directly to <span className="font-semibold text-violet-900">{professorName}</span>.
         </p>
 
-        {!user ? (
+        {user?.role !== "STUDENT" ? (
           <div className="mt-6 rounded-xl border border-amber-300 bg-amber-50/80 p-4 text-center">
             <p className="text-sm font-semibold text-amber-950">Student Sign In Required</p>
             <p className="mt-1 text-xs text-amber-800">

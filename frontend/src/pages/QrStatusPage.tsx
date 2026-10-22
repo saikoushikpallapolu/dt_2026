@@ -1,3 +1,4 @@
+import { NextAvailability } from "@/components/NextAvailability";
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -51,28 +52,29 @@ export function QrStatusPage() {
       }
       throw new Error("No token or slug provided");
     },
-    refetchInterval: 15000, // automatic live refresh every 15s
+    refetchInterval: 5000, // automatic live refresh every 15s
   });
 
-  const [isFavorited, setIsFavorited] = useState(false);
+  const { data: favoriteData, refetch: refreshFavorites } = useQuery({ queryKey: ['favorites', user?.id], queryFn: () => api.getFavorites(), enabled: user?.role === 'STUDENT' });
+  const isFavorited = !!favoriteData?.favorites.some(p => p.id === data?.professor.id);
 
   const handleToggleFavorite = async () => {
     if (!data?.professor?.id || !user) return;
     try {
       if (isFavorited) {
         await api.removeFavorite(data.professor.id);
-        setIsFavorited(false);
+        await refreshFavorites();
       } else {
         await api.addFavorite(data.professor.id);
-        setIsFavorited(true);
+        await refreshFavorites();
       }
     } catch (err) {
       console.error("Failed to toggle favorite:", err);
     }
   };
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
+  const handleCopyLink = async () => {
+    try { await navigator.clipboard.writeText(window.location.href); } catch { window.prompt("Copy this profile link", window.location.href); return; }
     setCopySuccess(true);
     setTimeout(() => setCopySuccess(false), 2000);
   };
@@ -385,12 +387,13 @@ export function QrStatusPage() {
               )}
             </div>
 
+            <NextAvailability slots={officeHours || []} />
             {/* Office Hours Section */}
             {officeHours && officeHours.length > 0 && (
               <div className="rounded-2xl border border-violet-100 p-5 bg-white shadow-2xs">
                 <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
                   <Calendar className="h-4 w-4 text-violet-700" />
-                  <span>Posted Consultation Hours</span>
+                  <span>Weekly office hours · IST</span>
                 </div>
                 <div className="mt-3 divide-y divide-slate-100 text-xs">
                   {officeHours.map((oh: any) => (

@@ -48,7 +48,7 @@ export function PrintSignPage() {
         <div className="flex items-center justify-center gap-2 text-slate-800">
           <ShieldCheck className="h-6 w-6 text-violet-900" />
           <span className="text-xs font-extrabold uppercase tracking-widest text-slate-800">
-            Official Faculty Office Placard
+            VNR VJIET · Faculty Office
           </span>
         </div>
 

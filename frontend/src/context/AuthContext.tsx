@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { AuthUser } from "@wimp/shared";
 import { api } from "@/lib/api";
 
@@ -11,27 +12,27 @@ export interface DemoAccount {
 
 export const DEMO_ACCOUNTS: DemoAccount[] = [
   {
-    label: "Dr. Elena Rivera",
-    roleDescription: "Associate Professor (CS Dept)",
-    email: "elena.rivera@demo.local",
+    label: "Dr. Ananya Reddy",
+    roleDescription: "Professor & HOD · CSE",
+    email: "ananya.reddy@vnr.demo",
     role: "PROFESSOR",
   },
   {
-    label: "Dr. Marcus Chen",
-    roleDescription: "Assistant Professor (Expired Status Demo)",
-    email: "marcus.chen@demo.local",
+    label: "Dr. Vikram Rao",
+    roleDescription: "Associate Professor · CSE",
+    email: "vikram.rao@vnr.demo",
     role: "PROFESSOR",
   },
   {
     label: "Student Patel",
     roleDescription: "Undergraduate Student",
-    email: "student.patel@demo.local",
+    email: "student@vnr.demo",
     role: "STUDENT",
   },
   {
     label: "Admin User",
     roleDescription: "Campus Administrator",
-    email: "admin@demo.local",
+    email: "admin@vnr.demo",
     role: "ADMINISTRATOR",
   },
 ];
@@ -49,6 +50,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const queryClient = useQueryClient();
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -69,18 +71,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password = "DemoPass123!"): Promise<AuthUser> => {
     const res = await api.login(email, password);
+    await queryClient.cancelQueries();
+    queryClient.clear();
     setUser(res.user);
     return res.user;
   };
 
   const register = async (email: string, password = "DemoPass123!"): Promise<AuthUser> => {
     const res = await api.register(email, password);
+    await queryClient.cancelQueries();
+    queryClient.clear();
     setUser(res.user);
     return res.user;
   };
 
   const logout = async () => {
     await api.logout();
+    queryClient.clear();
     setUser(null);
   };
 
@@ -100,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         refreshUser,
       }}
     >
-      {children}
+      <React.Fragment key={user?.id || "guest"}>{children}</React.Fragment>
     </AuthContext.Provider>
   );
 }
