@@ -17,7 +17,10 @@
     "db:reset": "npm run prisma:reset -w @wimp/backend",
     "demo:seed": "tsx backend/prisma/demo.ts",
     "demo": "node scripts/demo.mjs",
-    "demo:verify": "node scripts/verify-demo.mjs"
+    "demo:verify": "node scripts/verify-demo.mjs",
+    "start": "npm run start -w @wimp/backend",
+    "render:build": "npm run prisma:generate -w @wimp/backend && npm run build && npm run prisma:migrate -w @wimp/backend && npm run demo:seed",
+    "render:start": "npm run start -w @wimp/backend"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.1",

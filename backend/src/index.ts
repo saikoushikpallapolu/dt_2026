@@ -34,10 +34,13 @@ async function ensureDatabase() {
 import { startAutomationWorker } from "./services/automation-service.js";
 
 async function startServer() {
-  await ensureDatabase();
+  if (process.env.NODE_ENV !== "production") {
+    await ensureDatabase();
+  }
   const app = createApp(env);
-  app.listen(env.API_PORT, () => {
-    console.log(`API listening on http://localhost:${env.API_PORT}`);
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : env.API_PORT;
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`Server listening on http://0.0.0.0:${port}`);
     // Published availability is controlled by faculty. Timetable simulation is admin-only.
   });
 }

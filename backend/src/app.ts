@@ -1,4 +1,7 @@
 import { liveUpdates } from "./services/live-updates.js";
+import path from "node:path";
+import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 import cors from "cors";
 import express from "express";
 import helmet from "helmet";
@@ -14,18 +17,22 @@ import { createFavoritesRouter } from "./routes/favorites.js";
 import { createNotificationsRouter } from "./routes/notifications.js";
 import { createAdminRouter } from "./routes/admin.js";
 
+const here = path.dirname(fileURLToPath(import.meta.url));
+
 export function createApp(appEnv: AppEnv) {
   const app = express();
 
+  app.set("trust proxy", 1);
   app.disable("x-powered-by");
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: "cross-origin" },
+      contentSecurityPolicy: false,
     }),
   );
   app.use(
     cors({
-      origin: appEnv.FRONTEND_ORIGIN,
+      origin: appEnv.FRONTEND_ORIGIN || true,
       credentials: true,
     }),
   );
@@ -73,7 +80,19 @@ export function createApp(appEnv: AppEnv) {
   app.use("/api/v1/notifications", createNotificationsRouter());
   app.use("/api/v1/admin", createAdminRouter(appEnv));
 
-  // 404 handler
+  // Serve frontend SPA in production if built
+  const clientDist = path.resolve(here, "../../frontend/dist");
+  if (fs.existsSync(clientDist)) {
+    app.use(express.static(clientDist));
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith("/api/") || req.path === "/health") {
+        return next();
+      }
+      res.sendFile(path.join(clientDist, "index.html"));
+    });
+  }
+
+  // 404 handler for unmatched API routes
   app.use((req, res) => {
     res.status(404).json({
       error: {
