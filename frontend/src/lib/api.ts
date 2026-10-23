@@ -188,6 +188,13 @@ export const api = {
     });
   },
 
+  async toggleNotifyWhenAvailable(professorId: string, notifyWhenAvailable: boolean): Promise<{ ok: boolean; notifyWhenAvailable: boolean }> {
+    return request(`/favorites/${professorId}/notify`, {
+      method: "PATCH",
+      body: JSON.stringify({ notifyWhenAvailable }),
+    });
+  },
+
   // Notifications
   async getNotifications(): Promise<{ notifications: NotificationItem[]; unreadCount: number }> {
     return request("/notifications");

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Compass, ChevronDown, Bell, LogOut, ScanLine, Users, CalendarDays, User, LayoutDashboard } from 'lucide-react';
+import { Compass, ChevronDown, Bell, LogOut, ScanLine, Users, CalendarDays, User, LayoutDashboard, X } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 
@@ -10,12 +10,33 @@ export function Navbar() {
   const navigate = useNavigate();
   const [menu, setMenu] = useState(false);
   const [notifications, setNotifications] = useState(false);
+  const [activeToast, setActiveToast] = useState<{ id: string; title: string; body: string } | null>(null);
+  const prevCountRef = useRef<number | null>(null);
 
   const { data, refetch } = useQuery({
     queryKey: ['notifications', user?.id],
     queryFn: () => api.getNotifications(),
     enabled: !!user,
   });
+
+  useEffect(() => {
+    if (data?.unreadCount !== undefined) {
+      if (prevCountRef.current !== null && data.unreadCount > prevCountRef.current) {
+        const latest = data.notifications[0];
+        if (latest) {
+          setActiveToast({ id: latest.id, title: latest.title, body: latest.body });
+          if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            try {
+              new Notification(latest.title, { body: latest.body });
+            } catch {
+              // ignore
+            }
+          }
+        }
+      }
+      prevCountRef.current = data.unreadCount;
+    }
+  }, [data]);
 
   const portal = user?.role === 'PROFESSOR'
     ? '/faculty/dashboard'
@@ -79,14 +100,40 @@ export function Navbar() {
                       </button>
                     </div>
                     {!data?.notifications.length ? (
-                      <p className="muted py-5">You're all caught up.</p>
+                      <p className="muted py-5 text-center text-xs text-slate-400">You're all caught up.</p>
                     ) : (
-                      data.notifications.slice(0, 8).map((n) => (
-                        <div className="notification-item" key={n.id}>
-                          <strong>{n.title}</strong>
-                          <p>{n.body}</p>
-                        </div>
-                      ))
+                      <div className="divide-y divide-slate-100 max-h-80 overflow-y-auto">
+                        {data.notifications.slice(0, 10).map((n) => {
+                          const isUnread = !n.readAt;
+                          return (
+                            <div
+                              className={`p-3 text-xs transition cursor-pointer hover:bg-violet-50/60 ${isUnread ? 'bg-violet-50/40' : ''}`}
+                              key={n.id}
+                              onClick={async () => {
+                                if (isUnread) {
+                                  await api.markNotificationRead(n.id);
+                                  refetch();
+                                }
+                                setNotifications(false);
+                                if (n.type === 'FACULTY_AVAILABLE' && n.payload?.slug) {
+                                  navigate(`/faculty/${n.payload.slug}`);
+                                } else if (n.type === 'MEETING_REQUESTED') {
+                                  navigate(portal);
+                                }
+                              }}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <strong className="text-slate-900 font-bold text-xs">{n.title}</strong>
+                                {isUnread && <span className="h-2 w-2 rounded-full bg-violet-600 shrink-0 mt-1" />}
+                              </div>
+                              <p className="mt-1 text-slate-600 text-[11px] leading-relaxed">{n.body}</p>
+                              <span className="mt-1.5 inline-block text-[10px] text-slate-400">
+                                {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     )}
                   </div>
                 )}
@@ -182,6 +229,31 @@ export function Navbar() {
           </NavLink>
         )}
       </nav>
+
+      {/* Real-time Floating Notification Banner Toast */}
+      {activeToast && (
+        <div
+          role="alert"
+          className="fixed top-18 right-4 z-50 max-w-sm rounded-2xl border border-violet-200 bg-white p-4 shadow-xl ring-1 ring-violet-500/10 animate-in fade-in slide-in-from-top-2 duration-200"
+        >
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-violet-600 text-white shrink-0 mt-0.5 shadow-xs">
+              <Bell className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-violet-950">{activeToast.title}</p>
+              <p className="mt-1 text-xs text-slate-600 leading-relaxed">{activeToast.body}</p>
+            </div>
+            <button
+              onClick={() => setActiveToast(null)}
+              className="text-slate-400 hover:text-slate-600 p-1 -mr-1 -mt-1 rounded-lg"
+              title="Close notification"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

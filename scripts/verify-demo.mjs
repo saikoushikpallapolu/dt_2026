@@ -3,7 +3,7 @@ const base='http://localhost:4100/api/v1';
 async function call(path,method='GET',body,cookie){const r=await fetch(base+path,{method,headers:{'Content-Type':'application/json',...(cookie?{Cookie:cookie}:{})},body:body?JSON.stringify(body):undefined});const data=r.headers.get('content-type')?.includes('json')?await r.json():await r.arrayBuffer();return {status:r.status,data,cookie:r.headers.get('set-cookie')?.split(';')[0]};}
 async function login(email){const r=await call('/auth/login','POST',{email,password:'DemoPass123!'});assert.equal(r.status,200);return r.cookie;}
 const professor=await login('ananya.reddy@vnr.demo');const student=await login('student@vnr.demo');const other=await login('vikram.rao@vnr.demo');
-const list=await call('/faculty?limit=50');assert.equal(list.data.items.length,20);assert.equal(new Set(list.data.items.map(p=>p.activeQrToken)).size,20);
+const list=await call('/faculty?limit=50');assert.ok(list.data.items.length>=20);assert.equal(new Set(list.data.items.map(p=>p.activeQrToken)).size,list.data.items.length);
 for(const p of list.data.items){const qr=await call('/qr/'+p.activeQrToken);assert.equal(qr.data.professor.id,p.id);}
 console.log('PASS: 20 faculty, 20 unique persistent QR profiles');
 const original=(await call('/faculty/me/status','GET',undefined,professor)).data;

@@ -57,6 +57,7 @@ export function createFavoritesRouter(): Router {
           currentStatus: formatStatusDetail(rawStatus),
           activeQrToken: prof.qrCodes[0]?.token || null,
           isFavorited: true,
+          notifyWhenAvailable: fav.notifyWhenAvailable ?? true,
         };
       });
 
@@ -69,6 +70,7 @@ export function createFavoritesRouter(): Router {
   router.post("/:professorId", requireAuth, requireRole("STUDENT"), async (req, res, next) => {
     try {
       const { professorId } = req.params;
+      const notifyWhenAvailable = req.body?.notifyWhenAvailable !== false;
 
       const professor = await prisma.professor.findUnique({
         where: { id: professorId },
@@ -89,11 +91,37 @@ export function createFavoritesRouter(): Router {
         create: {
           studentUserId: req.user!.id,
           professorId,
+          notifyWhenAvailable,
         },
-        update: {},
+        update: {
+          notifyWhenAvailable,
+        },
       });
 
-      res.json({ ok: true, favorited: true });
+      res.json({ ok: true, favorited: true, notifyWhenAvailable });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+  router.patch("/:professorId/notify", requireAuth, requireRole("STUDENT"), async (req, res, next) => {
+    try {
+      const { professorId } = req.params;
+      const notifyWhenAvailable = req.body?.notifyWhenAvailable !== false;
+
+      const updated = await prisma.favorite.update({
+        where: {
+          studentUserId_professorId: {
+            studentUserId: req.user!.id,
+            professorId,
+          },
+        },
+        data: {
+          notifyWhenAvailable,
+        },
+      });
+
+      res.json({ ok: true, notifyWhenAvailable: updated.notifyWhenAvailable });
     } catch (err) {
       next(err);
     }

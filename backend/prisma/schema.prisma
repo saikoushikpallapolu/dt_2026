@@ -230,12 +230,13 @@ model MeetingRequestEvent {
 }
 
 model Favorite {
-  id            String    @id @default(uuid())
-  studentUserId String    @map("student_user_id")
-  professorId   String    @map("professor_id")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  student       User      @relation(fields: [studentUserId], references: [id], onDelete: Cascade)
-  professor     Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
+  id                  String    @id @default(uuid())
+  studentUserId       String    @map("student_user_id")
+  professorId         String    @map("professor_id")
+  notifyWhenAvailable Boolean   @default(true) @map("notify_when_available")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  student             User      @relation(fields: [studentUserId], references: [id], onDelete: Cascade)
+  professor           Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
 
   @@unique([studentUserId, professorId])
   @@map("favorites")

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ArrowLeft,
+  Bell,
   Bookmark,
   BookmarkCheck,
   Building2,
@@ -56,20 +57,35 @@ export function QrStatusPage() {
   });
 
   const { data: favoriteData, refetch: refreshFavorites } = useQuery({ queryKey: ['favorites', user?.id], queryFn: () => api.getFavorites(), enabled: user?.role === 'STUDENT' });
-  const isFavorited = !!favoriteData?.favorites.some(p => p.id === data?.professor.id);
+  const currentFav = favoriteData?.favorites.find(p => p.id === data?.professor.id);
+  const isFavorited = !!currentFav;
+  const notifyEnabled = !!(currentFav as any)?.notifyWhenAvailable;
 
   const handleToggleFavorite = async () => {
     if (!data?.professor?.id || !user) return;
     try {
       if (isFavorited) {
         await api.removeFavorite(data.professor.id);
-        await refreshFavorites();
       } else {
         await api.addFavorite(data.professor.id);
-        await refreshFavorites();
       }
+      await refreshFavorites();
     } catch (err) {
       console.error("Failed to toggle favorite:", err);
+    }
+  };
+
+  const handleToggleNotify = async () => {
+    if (!data?.professor?.id || !user) return;
+    try {
+      if (!isFavorited) {
+        await api.addFavorite(data.professor.id);
+      } else {
+        await api.toggleNotifyWhenAvailable(data.professor.id, !notifyEnabled);
+      }
+      await refreshFavorites();
+    } catch (err) {
+      console.error("Failed to toggle notification preference:", err);
     }
   };
 
@@ -228,15 +244,30 @@ export function QrStatusPage() {
               </div>
 
               {user?.role === "STUDENT" && (
-                <button
-                  onClick={handleToggleFavorite}
-                  className={`rounded-xl p-2.5 transition ${
-                    isFavorited ? "bg-amber-400 text-slate-900" : "bg-white/10 text-white hover:bg-white/20"
-                  }`}
-                  title={isFavorited ? "Remove from bookmarks" : "Bookmark this professor"}
-                >
-                  {isFavorited ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleToggleFavorite}
+                    className={`rounded-xl p-2.5 transition ${
+                      isFavorited ? "bg-amber-400 text-slate-900" : "bg-white/10 text-white hover:bg-white/20"
+                    }`}
+                    title={isFavorited ? "Bookmarked" : "Bookmark this professor"}
+                  >
+                    {isFavorited ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+                  </button>
+                  {isFavorited && (
+                    <button
+                      onClick={handleToggleNotify}
+                      className={`rounded-xl p-2.5 transition flex items-center gap-1.5 text-xs font-semibold ${
+                        notifyEnabled
+                          ? "bg-emerald-400 text-slate-900 shadow-sm"
+                          : "bg-white/10 text-white hover:bg-white/20"
+                      }`}
+                      title={notifyEnabled ? "Notifications enabled when available" : "Click to notify when available"}
+                    >
+                      <Bell className="h-5 w-5" />
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -383,6 +414,40 @@ export function QrStatusPage() {
                 <div className="mt-3 rounded-xl border border-violet-100 bg-white p-3.5 text-xs text-slate-700">
                   <p className="font-semibold text-slate-900 text-[11px] uppercase tracking-wider">Note from Professor:</p>
                   <p className="mt-1 italic text-slate-600">"{status.publicMessage}"</p>
+                </div>
+              )}
+
+              {/* Notify when Available Banner (for students when professor is not available) */}
+              {user?.role === "STUDENT" && status.status !== "AVAILABLE" && (
+                <div className="mt-4 rounded-xl border border-violet-200 bg-linear-to-r from-violet-50 to-indigo-50 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${notifyEnabled ? "bg-violet-600 text-white" : "bg-white text-slate-500 border border-slate-200"}`}>
+                        <Bell className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-slate-900">
+                          {notifyEnabled ? "Notification Alert Active" : "Notify When Available"}
+                        </p>
+                        <p className="text-[11px] text-slate-600">
+                          {notifyEnabled
+                            ? `You will be alerted instantly when ${professor.user.displayName || professor.user.name} returns to office.`
+                            : `Get an instant alert the moment ${professor.user.displayName || professor.user.name} marks their status as Available.`}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleToggleNotify}
+                      className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                        notifyEnabled
+                          ? "bg-violet-600 text-white shadow-sm hover:bg-violet-700"
+                          : "bg-white text-violet-700 border border-violet-300 hover:bg-violet-50"
+                      }`}
+                    >
+                      {notifyEnabled ? "Active" : "Notify Me"}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

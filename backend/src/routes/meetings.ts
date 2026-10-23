@@ -3,6 +3,7 @@ import { z } from "zod";
 import { MeetingRequestStatus } from "@prisma/client";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
+import { publishCampusChange } from "../services/live-updates.js";
 import type { MeetingRequestItem } from "@wimp/shared";
 
 const createMeetingSchema = z.object({
@@ -119,6 +120,8 @@ export function createMeetingsRouter(): Router {
 
         return created;
       });
+
+      publishCampusChange();
 
       res.status(201).json({
         ok: true,

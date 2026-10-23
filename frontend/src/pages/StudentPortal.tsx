@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import {
+  Bell,
   Bookmark,
   Calendar,
   Clock,
@@ -36,6 +37,14 @@ export function StudentPortal() {
 
   const removeFavMutation = useMutation({
     mutationFn: (professorId: string) => api.removeFavorite(professorId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+    },
+  });
+
+  const toggleNotifyMutation = useMutation({
+    mutationFn: ({ professorId, notify }: { professorId: string; notify: boolean }) =>
+      api.toggleNotifyWhenAvailable(professorId, notify),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["favorites"] });
     },
@@ -129,14 +138,43 @@ export function StudentPortal() {
                     </div>
 
                     <div className="flex flex-col items-end gap-2">
-                      <button
-                        type="button"
-                        onClick={() => removeFavMutation.mutate(prof.id)}
-                        className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
-                        title="Remove bookmark"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            toggleNotifyMutation.mutate({
+                              professorId: prof.id,
+                              notify: !prof.notifyWhenAvailable,
+                            })
+                          }
+                          className={`rounded-lg px-2 py-1 transition flex items-center gap-1 text-[11px] font-semibold ${
+                            prof.notifyWhenAvailable
+                              ? "bg-violet-100 text-violet-800 hover:bg-violet-200"
+                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                          }`}
+                          title={
+                            prof.notifyWhenAvailable
+                              ? "Click to disable notify when available"
+                              : "Click to notify when professor becomes available"
+                          }
+                        >
+                          <Bell
+                            className={`h-3.5 w-3.5 ${
+                              prof.notifyWhenAvailable ? "fill-violet-700 text-violet-700" : "text-slate-400"
+                            }`}
+                          />
+                          <span>{prof.notifyWhenAvailable ? "Alert On" : "Notify Me"}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => removeFavMutation.mutate(prof.id)}
+                          className="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                          title="Remove bookmark"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
 
                       <Link
                         to={prof.activeQrToken ? `/qr/${prof.activeQrToken}` : `/faculty/${prof.slug}`}

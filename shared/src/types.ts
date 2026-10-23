@@ -87,6 +87,7 @@ export interface ProfessorListItem {
   currentStatus: StatusDetail;
   activeQrToken?: string | null;
   isFavorited?: boolean;
+  notifyWhenAvailable?: boolean;
 }
 
 export interface QrStatusResponse {

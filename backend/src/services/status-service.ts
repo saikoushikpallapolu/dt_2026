@@ -137,6 +137,44 @@ export async function updateProfessorStatus(input: UpdateStatusInput): Promise<S
     return currentStatus;
   });
 
+  // If status is AVAILABLE, notify all subscribed students
+  if (status === "AVAILABLE") {
+    try {
+      const professor = await prisma.professor.findUnique({
+        where: { id: professorId },
+        include: { office: true },
+      });
+      if (professor) {
+        const subscribers = await prisma.favorite.findMany({
+          where: {
+            professorId,
+            notifyWhenAvailable: true,
+          },
+        });
+        const locationText = professor.office ? `Room ${professor.office.room}` : "their office";
+        const note = publicMessage ? ` "${publicMessage}"` : "";
+
+        for (const sub of subscribers) {
+          await prisma.notification.create({
+            data: {
+              userId: sub.studentUserId,
+              type: "FACULTY_AVAILABLE",
+              title: `${professor.displayName} is now Available`,
+              body: `${professor.displayName} has updated their status to Available in ${locationText}.${note}`,
+              payload: {
+                professorId: professor.id,
+                slug: professor.slug,
+                status: "AVAILABLE",
+              },
+            },
+          });
+        }
+      }
+    } catch (notifErr) {
+      console.error("Failed to notify subscribed students:", notifErr);
+    }
+  }
+
   publishCampusChange();
   return formatStatusDetail(result);
 }
