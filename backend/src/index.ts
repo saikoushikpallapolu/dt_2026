@@ -33,9 +33,48 @@ async function ensureDatabase() {
 
 import { startAutomationWorker } from "./services/automation-service.js";
 
+import { execSync } from "node:child_process";
+import fs from "node:fs";
+
+async function ensureProductionSetup() {
+  if (process.env.DATABASE_URL) {
+    console.log("[production] Ensuring database schema and migrations...");
+    try {
+      execSync("npx prisma migrate deploy --schema backend/prisma/schema.prisma", { stdio: "inherit" });
+    } catch (e: any) {
+      console.warn("[production] Notice running prisma migrate deploy:", e.message);
+    }
+
+    try {
+      console.log("[production] Ensuring seed faculty accounts exist...");
+      execSync("npx tsx backend/prisma/demo.ts", { stdio: "inherit" });
+    } catch (e: any) {
+      console.warn("[production] Notice running seed:", e.message);
+    }
+  }
+
+  // Ensure frontend bundle is built
+  const possibleDist = [
+    path.resolve(__dirname, "../../frontend/dist/index.html"),
+    path.resolve(process.cwd(), "frontend/dist/index.html"),
+    "/opt/render/project/src/frontend/dist/index.html",
+  ];
+  const hasDist = possibleDist.some((p) => fs.existsSync(p));
+  if (!hasDist) {
+    console.log("[production] Frontend build missing, building frontend bundle now...");
+    try {
+      execSync("npm run build -w @wimp/frontend", { stdio: "inherit" });
+    } catch (e: any) {
+      console.warn("[production] Notice building frontend:", e.message);
+    }
+  }
+}
+
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     await ensureDatabase();
+  } else {
+    await ensureProductionSetup();
   }
   const app = createApp(env);
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : env.API_PORT;
