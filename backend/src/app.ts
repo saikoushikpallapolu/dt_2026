@@ -81,8 +81,16 @@ export function createApp(appEnv: AppEnv) {
   app.use("/api/v1/admin", createAdminRouter(appEnv));
 
   // Serve frontend SPA in production if built
-  const clientDist = path.resolve(here, "../../frontend/dist");
-  if (fs.existsSync(clientDist)) {
+  const candidateDirs = [
+    path.resolve(here, "../../frontend/dist"),
+    path.resolve(here, "../frontend/dist"),
+    path.resolve(process.cwd(), "frontend/dist"),
+    path.resolve(process.cwd(), "../frontend/dist"),
+    "/opt/render/project/src/frontend/dist",
+  ];
+  const clientDist = candidateDirs.find((d) => fs.existsSync(path.join(d, "index.html")));
+  if (clientDist) {
+    console.log(`[production] Serving frontend SPA from: ${clientDist}`);
     app.use(express.static(clientDist));
     app.get("*", (req, res, next) => {
       if (req.path.startsWith("/api/") || req.path === "/health") {
@@ -90,6 +98,8 @@ export function createApp(appEnv: AppEnv) {
       }
       res.sendFile(path.join(clientDist, "index.html"));
     });
+  } else {
+    console.warn("[production] Warning: frontend/dist/index.html not found in:", candidateDirs);
   }
 
   // 404 handler for unmatched API routes
