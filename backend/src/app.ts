@@ -102,6 +102,20 @@ export function createApp(appEnv: AppEnv) {
     console.warn("[production] Warning: frontend/dist/index.html not found in:", candidateDirs);
   }
 
+  app.get("/api/v1/debug-deploy", (_req, res) => {
+    res.json({
+      here,
+      cwd: process.cwd(),
+      commit: process.env.RENDER_GIT_COMMIT || "local",
+      databaseUrlSet: !!process.env.DATABASE_URL,
+      candidates: candidateDirs.map((d) => ({
+        dir: d,
+        exists: fs.existsSync(d),
+        hasIndex: fs.existsSync(path.join(d, "index.html")),
+      })),
+    });
+  });
+
   // 404 handler for unmatched API routes
   app.use((req, res) => {
     res.status(404).json({
