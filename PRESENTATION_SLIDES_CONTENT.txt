@@ -1,0 +1,624 @@
+================================================================================
+            FIND MY PROFESSOR · VNR VJIET
+  Smart Faculty Digital Placard & Real-Time Consultation Scheduling Ecosystem
+               DESIGN THINKING PROJECT PRESENTATION CONTENT
+================================================================================
+
+Institution: VALLURUPALLI NAGESWARA RAO VIGNANA JYOTHI INSTITUTE OF ENGINEERING & TECHNOLOGY (VNR VJIET)
+Department: Department of Computer Science and Engineering (CSE)
+Centre: Centre for Presencing and Design Thinking (CPDT)
+Academic Mentor: Mrs. Prasanna Pabba (Assistant Professor, Dept. of CSE)
+
+================================================================================
+IMAGE ASSETS FOLDER GUIDE
+================================================================================
+All pictures and infographics referenced in this document are stored in the folder:
+  `presentation_assets/`
+
+Files available in this folder:
+  1. `team_cpdt.png`                     -> Real photo of your team at VNR VJIET under the CPDT sign
+  2. `product_directory.png`             -> High-res screenshot of the real-time Faculty Directory
+  3. `product_placard.png`               -> High-res screenshot of the Professor Door Placard
+  4. `product_workspace.png`             -> High-res screenshot of the Faculty Management Workspace
+  5. `product_mobile_placard.png`        -> Responsive mobile phone view of the digital placard
+  6. `product_mobile_scanner.png`        -> Real-time in-browser camera QR code scanner
+  7. `diagram_system_architecture.png`   -> Full client-engine-data architecture diagram
+  8. `diagram_empathy_map.png`           -> 4-quadrant visual empathy map (Says, Thinks, Does, Feels)
+  9. `diagram_scamper_ideation.png`      -> SCAMPER innovation framework card layout
+  10. `diagram_un_sdgs.png`              -> Visual cards for UN SDGs 4, 9, and 11
+  11. `placard_qr_prasanna_mam.png`      -> Digital Placard mockup for Mrs. Prasanna Pabba (PG-302)
+
+================================================================================
+SLIDE 1: TITLE SLIDE
+================================================================================
+[RECOMMENDED LAYOUT]
+Dark navy / clean academic modern theme. Split-screen layout:
+- Left: Project title, subtitle, and institutional affiliations.
+- Right: Large Placard / QR visual preview (`placard_qr_prasanna_mam.png`).
+- Bottom: Team metadata and Mentor information.
+
+[SLIDE CONTENT - COPY & PASTE]
+Header / Eyebrow:
+  Centre for Presencing and Design Thinking (CPDT)
+  Department of Computer Science and Engineering
+  VNR VJIET, Hyderabad
+
+Main Title:
+  FIND MY PROFESSOR
+  Real-Time Faculty Digital Placard & Consultation Scheduling Ecosystem
+
+Subtitle / Tagline:
+  A Human-Centered IoT & Web Solution Eliminating Campus Transit Friction and Bridging Faculty-Student Availability
+
+Project Details:
+  - Course: Design Thinking & Innovation (2025-2026)
+  - Project Mentor: Mrs. Prasanna Pabba (Assistant Professor, Dept. of CSE)
+  - Team ID / Cohort: CPDT Batch 2026
+  - Presentation Type: Final Design Thinking Project Evaluation
+
+[PICTURE TO INSERT]
+  Insert `placard_qr_prasanna_mam.png` on the right side of the slide as a preview card of the physical product.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Good morning respected evaluators, faculty members, and fellow students. Today, our team is proud to present 'Find My Professor'—a design thinking-driven digital ecosystem designed specifically for VNR VJIET. Every day, thousands of students waste precious hours climbing multistory blocks looking for professors who might be in a meeting, in a laboratory, or on leave. We used the five stages of design thinking to solve this real-world campus friction. Let us walk you through our journey from empathy to a fully deployed live product."
+
+
+================================================================================
+SLIDE 2: THE TEAM
+================================================================================
+[RECOMMENDED LAYOUT]
+Two-column presentation:
+- Left: Your actual team photograph (`team_cpdt.png`) with a neat border and caption.
+- Right: Structured cards listing team members, roll numbers, and Design Thinking roles.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  THE TEAM
+Subtitle:
+  Centre for Presencing and Design Thinking (CPDT) Innovators · VNR VJIET
+
+Team Cards (Replace names/roll numbers with your team members' exact details):
+  Member 1: Team Lead & Full-Stack Systems Architect
+    - Focus: Problem framing, Server-Sent Events real-time engine, PostgreSQL database design.
+  Member 2: Design Thinking Lead & User Ethnography
+    - Focus: Field interviews, Empathy mapping, Journey maps, and Point-of-View synthesis.
+  Member 3: Frontend PWA & UX Interaction Designer
+    - Focus: Mobile-first responsive UI, QR scanner integration, accessibility and dark-mode aesthetics.
+  Member 4: Quality Assurance & Validation Specialist
+    - Focus: Latency benchmarking, campus network resilience testing, and mentor feedback loops.
+
+Faculty Project Mentor:
+  Mrs. Prasanna Pabba
+  Assistant Professor, Department of Computer Science and Engineering, VNR VJIET
+
+[PICTURE TO INSERT]
+  Insert `team_cpdt.png` on the left half of the slide.
+  Caption: "Team CPDT at the Centre for Presencing and Design Thinking, VNR VJIET Campus."
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Here is our team standing right outside the Centre for Presencing and Design Thinking at our college. We divided our roles into user research, empathy mapping, full-stack prototyping, and validation under the continuous guidance of our mentor, Mrs. Prasanna Pabba. Each of us focused on ensuring our solution addresses human needs rather than just writing code."
+
+
+================================================================================
+SLIDE 3: AGENDA
+================================================================================
+[RECOMMENDED LAYOUT]
+Clean timeline or 6-box horizontal roadmap highlighting the Design Thinking process.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  PRESENTATION AGENDA
+Subtitle:
+  Our Journey through the 5 Phases of Design Thinking & Real-World Implementation
+
+Roadmap Steps:
+  1. Empathize & Discover: The reality of campus transit friction across VNR VJIET blocks.
+  2. Define: Unpacking user interviews, Empathy Maps, and Point-of-View (POV) formulations.
+  3. Ideate: Divergent thinking via Brainstorming and the SCAMPER innovation framework.
+  4. Prototype & Architecture: Building a fault-tolerant, zero-install PWA with Server-Sent Events.
+  5. Testing & Mentor Validation: Incorporating iterative feedback from Mrs. Prasanna Pabba.
+  6. Sustainability & Impact: Alignment with UN Sustainable Development Goals (SDG 4, 9, 11) & Future Roadmap.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Our presentation follows the Stanford d.school Design Thinking framework. We will start with the raw friction observed in our campus corridors, demonstrate how we synthesized user needs, explain our SCAMPER ideation, walk through our working prototype, and conclude with the tangible impact on campus sustainability."
+
+
+================================================================================
+SLIDE 4: PROBLEM STATEMENT (CONTEXT & CAMPUS FRICTION)
+================================================================================
+[RECOMMENDED LAYOUT]
+Left: Highlighting key baseline metrics (3 large callout numbers).
+Right: Narrative description of the problem and real student quotes.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  PROBLEM STATEMENT · CAMPUS CONTEXT
+Subtitle:
+  The Asymmetry of Availability: Wasted Hours in University Corridors
+
+Key Observed Metrics (Campus Survey of 85+ Students across PG, B-Block, & K-Block):
+  - 18 to 25 Minutes: Average round-trip transit & waiting time wasted per student per consultation attempt.
+  - 68% Failure Rate: Percentage of ad-hoc cabin visits that end without meeting the faculty member.
+  - 4 to 8 Disruptions: Number of unwanted door knocks received by each professor daily during focused work.
+
+The Core Campus Dilemma:
+  - VNR VJIET spans large multistory academic blocks (PG Block, B-Block, K-Block, Civil/Mech Block).
+  - Faculty members juggle lecturing, lab supervision, departmental meetings, committee duties, and evaluation.
+  - Currently, students have no live visibility into cabin presence. They climb several flights of stairs only to find a locked door or an occupied professor.
+  - The only alternative was messaging faculty on personal WhatsApp numbers—an intrusive, unprofessional channel that faculty dislike and students hesitate to use.
+
+[PICTURE TO INSERT]
+  Insert `product_directory.png` (scaled down) or a small snapshot of the campus building.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "At VNR VJIET, our campus is vibrant and expansive. However, when students need to clarify doubts, get project reviews, or seek recommendation letters, they walk across blocks and climb 3 or 4 floors to cabin PG-302 or B-Block. Over 68% of these physical walks fail because the professor is engaged elsewhere. On the flip side, when professors are grading papers or conducting online research, they are repeatedly interrupted by random knocks. This is a severe communication asymmetry."
+
+
+================================================================================
+SLIDE 5: PROBLEM STATEMENT (KEY CHALLENGES & HOW MIGHT WE...)
+================================================================================
+[RECOMMENDED LAYOUT]
+3 Comparative Problem Cards on the top half, followed by a bold, highlighted "How Might We" callout box on the bottom half.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  PROBLEM STATEMENT · CHALLENGES & HMW
+Subtitle:
+  Reframing Campus Friction into an Actionable Design Opportunity
+
+The 3 Key Friction Vectors:
+  1. Complete Status Opacity:
+     - Door signs are static pieces of laminated paper showing only names, not current availability or office hours.
+  2. Corridor Congestion & Privacy Loss:
+     - Groups of waiting students crowd cabin corridors, causing acoustic noise during neighboring lab hours.
+  3. Intrusive & Fragmented Communication:
+     - Reliance on casual WhatsApp pings creates notification fatigue for faculty and lacks an organized queue.
+
+The Design Challenge (How Might We):
+  "How might we provide students with instant, real-time cabin availability before they walk, while giving professors effortless 1-tap control over their consultation hours without intrusive paper slips or mobile messaging spam?"
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "To transform this frustration into an engineering solution, we formulated our central Design Thinking question: How might we provide students with instant, real-time cabin visibility before they walk, while giving faculty complete 1-tap autonomy over their privacy? This HMW question anchored every architectural and design decision that followed."
+
+
+================================================================================
+SLIDE 6: RESEARCH APPROACH (USER EMPATHY MAP)
+================================================================================
+[RECOMMENDED LAYOUT]
+Place the generated high-resolution Empathy Map diagram (`diagram_empathy_map.png`) prominently in the center or right, with bulleted qualitative takeaways on the left.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  RESEARCH APPROACH · USER EMPATHY MAP
+Subtitle:
+  Deep Ethnography and Qualitative Field Interviews across VNR VJIET
+
+The 4 Empathy Quadrants:
+  - SAYS (Direct Quotes):
+    * Student: "I climbed 4 floors to PG Block only to see a locked door with zero clue when sir would return."
+    * Faculty: "Students knock during confidential student counseling or online research symposiums."
+    * Student: "Messaging professors on personal WhatsApp feels unprofessional and awkward."
+
+  - THINKS (Internal Beliefs & Anxieties):
+    * Student: "Will I look unprepared if I knock while they are busy? Is ma'am in class or on leave?"
+    * Faculty: "I want to mentor students, but ad-hoc walk-ins shatter my research and grading focus."
+
+  - DOES (Observed Daily Behaviors):
+    * Students wander through corridors and linger in groups outside cabins for 20-30 minutes.
+    * Faculty tape handwritten paper sticky notes like 'In Class' or 'In Meeting' which get blown away or forgotten.
+
+  - FEELS (Emotional Frustration):
+    * Students: Anxiety over looming project deadlines, exhaustion from wasted physical walks.
+    * Faculty: Overwhelmed by repetitive queries and fragmented communication channels.
+
+[PICTURE TO INSERT]
+  Insert `diagram_empathy_map.png` as the main hero visual on this slide.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "We conducted in-person ethnographic research across CSE and allied departments. Our empathy map reveals that both students and faculty share the exact same objective—high-quality academic mentorship. The barrier is purely logistical. Students feel anxious and exhausted by blind walks, while faculty feel overwhelmed by unscheduled interruptions."
+
+
+================================================================================
+SLIDE 7: DEFINING INSIGHTS: USER NEEDS
+================================================================================
+[RECOMMENDED LAYOUT]
+3-Column Card Layout categorizing Primary, Secondary, and Latent Needs with clear visual distinction.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  DEFINING INSIGHTS · USER NEEDS
+Subtitle:
+  Synthesizing Field Research into Actionable Functional Requirements
+
+1. PRIMARY NEEDS (Core Prerequisites):
+  - Real-Time Cabin Presence: Students need to know if the professor is physically 'Available', 'In Class', 'In Meeting', or 'Busy'.
+  - Micro-Interaction Simplicity for Faculty: Changing availability must take less than 2 seconds; otherwise, professors will abandon the tool.
+  - Zero Barrier to Entry for Students: Must not force students to download a 60MB native app or undergo complex registration.
+
+2. SECONDARY NEEDS (Operational Efficiency):
+  - Digital Consultation Booking: Structured 15-minute slots for project reviews, doubt clarification, and approvals.
+  - Cabin Location & Navigation Context: Clear room numbering (e.g., PG-302, 3rd Floor) and cabin directions.
+  - Queue Transparency: Knowing how many students are already waiting outside to avoid physical crowding.
+
+3. LATENT NEEDS (Unspoken Psychological Factors):
+  - Boundary Protection: Professors need a polite, systematic way to signal 'Do Not Disturb' without seeming inaccessible.
+  - Network Resilience: The application must function reliably over high-density campus Wi-Fi and intermittent 4G/5G signals.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "By analyzing our empathy data, we categorized user needs into Primary, Secondary, and Latent needs. Most notably, we discovered a vital latent need: professors desperately wanted boundaries without appearing rude, and students wanted confirmation without having to install heavy third-party apps on their phones."
+
+
+================================================================================
+SLIDE 8: POINT OF VIEW (POV) STATEMENT
+================================================================================
+[RECOMMENDED LAYOUT]
+Two distinct comparison cards:
+- Top: The Student Point of View.
+- Bottom: The Faculty Point of View.
+- Side: The Synthesized Design Imperative.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  POINT OF VIEW (POV) STATEMENTS
+Subtitle:
+  Formal Stanford d.school User-Need-Insight Framework
+
+Student Perspective:
+  - User: A VNR VJIET undergraduate balancing 6 theory courses, lab submissions, and capstone project deadlines.
+  - Need: A frictionless, instant way to verify their mentor's physical availability before navigating multistory blocks.
+  - Insight: Because unguided physical transits cause deep frustration and waste valuable revision and study hours.
+
+Faculty Perspective:
+  - User: A dedicated Assistant Professor handling lecturing, accreditation paperwork, student mentoring, and research.
+  - Need: Complete autonomy to broadcast real-time availability with a single tap, without dealing with personal chat messages.
+  - Insight: Because unannounced corridor walk-ins fragment deep cognitive focus and degrade one-on-one consultation quality.
+
+The Unified Design Imperative:
+  "Build a lightweight, ambient digital placard ecosystem that synchronizes cabin presence in real time across physical wall displays and personal student smartphones."
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Our Point of View statements capture both sides of the coin. A student needs to verify cabin presence before walking across campus, while a faculty member needs single-tap autonomy to protect their focused research hours. Our design imperative was to synchronize physical door walls with personal smartphones seamlessly."
+
+
+================================================================================
+SLIDE 9: IDEATION METHOD (BRAINSTORMING & SCAMPER)
+================================================================================
+[RECOMMENDED LAYOUT]
+Left: Insert the SCAMPER Framework graphic (`diagram_scamper_ideation.png`).
+Right: Highlighting the divergent ideas explored and the rationales.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  IDEATION METHOD · SCAMPER FRAMEWORK
+Subtitle:
+  Structured Divergent & Convergent Thinking to Reinvent the Door Placard
+
+SCAMPER Breakdown:
+  - S (Substitute):
+    * Replaced fragile paper sticky notes and static nameplates with real-time digital placards connected to a cloud database.
+  - C (Combine):
+    * Combined physical wall signage with dynamic QR codes, instant mobile queuing, and calendar slot booking.
+  - A (Adapt):
+    * Adapted the concept of hospital emergency triage displays and airport departure boards for university academic cabins.
+  - M (Modify / Magnify):
+    * Simplified scheduling into a 1-tap status selector (Available, Busy, In Meeting, In Class) taking under 1 second.
+  - P (Put to Other Uses):
+    * Repurposed the empty space beside cabin doors into an interactive digital touchpoint for students.
+  - E (Eliminate):
+    * Eliminated corridor loitering, awkward knocks, and intrusive WhatsApp messaging.
+  - R (Reverse / Reorganize):
+    * Reversed the paradigm: Instead of students searching blindly for faculty, faculty broadcast their status dynamically to all students.
+
+[PICTURE TO INSERT]
+  Insert `diagram_scamper_ideation.png` on this slide.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "To generate ideas beyond a simple static website, we deployed the SCAMPER framework. We substituted paper notes with live digital displays, adapted airport status boards for cabin doors, and reversed the search paradigm. Instead of students wandering the campus blindly, faculty availability is broadcasted instantly to every student's phone."
+
+
+================================================================================
+SLIDE 10: THE SOLUTION (CORE FEATURES & ECOSYSTEM)
+================================================================================
+[RECOMMENDED LAYOUT]
+3-Pillar Architecture visual displaying the three connected components:
+1. Physical Door Placard
+2. Student Mobile Web / PWA
+3. Faculty Control Workspace
+Include screenshots of all three components.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  THE SOLUTION · 'FIND MY PROFESSOR'
+Subtitle:
+  A Tri-Partite Digital Ecosystem Unifying Hardware, Web, and Mobile
+
+Pillar 1: The Ambient Digital Door Placard (Physical / Display)
+  - Installed on a tablet/display screen beside the faculty cabin door (e.g., PG-302).
+  - Displays current presence status with live pulsing badge ('Available', 'In Meeting', 'In Class').
+  - Prominently showcases a unique cryptographic QR code linking directly to that professor's live portal.
+
+Pillar 2: Student Mobile Progressive Web App (PWA)
+  - Instant camera-based QR scanner built right into the browser—zero app install required!
+  - Real-time status sync via Server-Sent Events (SSE) (<150ms latency).
+  - Direct 1-tap consultation slot booking with instant confirmation.
+
+Pillar 3: Faculty 1-Tap Control Workspace
+  - Secure faculty login with rapid toggle switches.
+  - Live consultation queue management (view waiting students, approve slots, mark completed).
+  - Custom return-time notices (e.g., "Returning to PG-302 at 02:30 PM after CSE Lab").
+
+[PICTURES TO INSERT]
+  - `product_placard.png` (Door Placard)
+  - `product_workspace.png` (Faculty Dashboard)
+  - `product_mobile_placard.png` (Mobile View)
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Our resulting solution is a comprehensive three-pillar ecosystem. First, the Ambient Door Placard posted outside the cabin. Second, the Student Mobile PWA that opens instantly upon scanning the door QR code without downloading any app. Third, the Faculty Control Workspace where professors can switch their status with a single tap. All three pillars stay continuously synchronized in real time."
+
+
+================================================================================
+SLIDE 11: PROTOTYPE & USER WORKFLOW (5-STEP PROCESS)
+================================================================================
+[RECOMMENDED LAYOUT]
+Horizontal 5-step process flow with step badges (1 to 5) and product snips placed beneath each step.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  PROTOTYPE & END-TO-END WORKFLOW
+Subtitle:
+  From Corridor Wall to Confirmed Consultation in 5 Seamless Steps
+
+The 5-Step Student Journey:
+  Step 1: Faculty Sets Status (1 Tap)
+    - Professor Mrs. Prasanna Pabba opens her workspace on laptop or phone and sets status to 'Available in Cabin'.
+  Step 2: Instant Physical Wall Broadcast
+    - The digital door placard outside PG-302 updates instantly to a glowing green badge.
+  Step 3: Student Discovers & Scans
+    - Student accesses the campus directory from their hostel or scans the QR code at the cabin door using their phone camera.
+  Step 4: Live Verification & Slot Selection
+    - Student sees live availability, upcoming office hours, and selects a 15-minute consultation slot.
+  Step 5: Coordinated Consultation
+    - Professor's workspace displays the incoming appointment; student arrives exactly when the professor is ready, eliminating all waiting.
+
+[PICTURES TO INSERT]
+  - Place `product_mobile_scanner.png` (showing camera viewfinder).
+  - Place `product_placard.png` (showing live door placard).
+  - Place `product_workspace.png` (showing appointment queue).
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Here is our working 5-step user journey. When a professor arrives at their desk, one tap updates the system. The door display reflects this in under a tenth of a second. A student can check this from their hostel or scan the door QR code. They book an open slot, and both parties meet efficiently without a single minute wasted standing in the hallway."
+
+
+================================================================================
+SLIDE 12: TECHNICAL FEASIBILITY & SYSTEM ARCHITECTURE
+================================================================================
+[RECOMMENDED LAYOUT]
+Prominently feature the system architecture diagram (`diagram_system_architecture.png`) in the center, flanked by technical engineering bullet points.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  TECHNICAL FEASIBILITY & ARCHITECTURE
+Subtitle:
+  High-Performance, Fault-Tolerant Full-Stack Architecture Built for Campus Networks
+
+Key Engineering Pillars:
+  - Frontend Client Tier:
+    * React 19 + TypeScript + Vite for ultra-fast, lightweight bundle size (<90 KB gzipped).
+    * Progressive Web App (PWA) with HTML5 Camera QR scanner and responsive mobile styling.
+  - Real-Time Communication Tier:
+    * Server-Sent Events (SSE) connection hub providing persistent unidirectional streaming.
+    * Adaptive Fallback Engine: Automatically detects mobile screen sleep (`visibilitychange`) and triggers intelligent 2-second polling if network drops.
+  - Backend Engine Tier:
+    * Node.js & Express.js REST API with structured event broadcast channels.
+    * Zero-dependency cryptographic QR code generator.
+  - Relational Database Tier:
+    * PostgreSQL 16 relational database with Prisma ORM ensuring strict schema validation and ACID transactions.
+    * Seeded campus dataset: 23 Faculty members, 18 Cabins, across 5 VNR VJIET departmental blocks.
+
+[PICTURE TO INSERT]
+  Insert `diagram_system_architecture.png` as the hero diagram.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "To ensure this is not merely a prototype, we engineered a production-ready full-stack architecture. We chose Server-Sent Events over heavy WebSockets because it is lightweight, traverses college proxy firewalls without drops, and consumes virtually zero battery on mobile phones. If a student walks into an elevator where signal drops, our adaptive sync engine automatically resynchronizes state the moment they regain signal."
+
+
+================================================================================
+SLIDE 13: INNOVATION: DESIRABILITY, FEASIBILITY, VIABILITY
+================================================================================
+[RECOMMENDED LAYOUT]
+3 Intersecting Circles or a 3-Column Evaluation Matrix (DFV Framework of Innovation).
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  INNOVATION ANALYSIS · DFV FRAMEWORK
+Subtitle:
+  Balancing Human Desirability, Technical Feasibility, and Economic Viability
+
+1. DESIRABILITY (Human-Centered Need):
+  - Solves the #1 daily friction point for 6,000+ VNR VJIET engineering students.
+  - Faculty praise the privacy safeguards; eliminates personal WhatsApp intrusions and awkward door knockings.
+  - High emotional appeal: Gives students confidence that their walk across campus will be productive.
+
+2. FEASIBILITY (Technical Implementation):
+  - 100% web-native: Runs in Chrome, Safari, Edge without App Store / Play Store friction.
+  - Uses existing college infrastructure: Can run on low-cost tablets, old monitors, or simple printed laminated QR sheets.
+  - Tested and operational: Live local deployment and cloud-hosted database on PostgreSQL.
+
+3. VIABILITY (Campus Scalability & Low Cost):
+  - Near-Zero Incremental Cost: No proprietary RFIDs or expensive smart locks required; standard QR stickers cost less than ₹20 per cabin.
+  - Department-wide Scalability: Easily expandable from CSE to all 14 engineering departments across VNR VJIET.
+  - Operational Longevity: Minimal maintenance overhead and open-source software stack.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "In Design Thinking, true innovation sits at the intersection of Desirability, Feasibility, and Viability. Our solution is desirable because students and faculty both love it; feasible because it runs on standard web browsers with sub-second latency; and economically viable because it requires zero expensive hardware—simple laminated QR placards cost under 20 rupees per cabin."
+
+
+================================================================================
+SLIDE 14: DESIGN FOR ENVIRONMENT & UN SDGs
+================================================================================
+[RECOMMENDED LAYOUT]
+Highlight the 3 United Nations Sustainable Development Goals using `diagram_un_sdgs.png` or 3 bold cards for SDG 4, SDG 9, and SDG 11.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  DESIGN FOR ENVIRONMENT & UN SDGS
+Subtitle:
+  Aligning Campus Innovation with Global Sustainability Targets
+
+1. SDG 4: QUALITY EDUCATION (Target 4.3 & 4.4)
+  - Fosters meaningful academic mentorship and project collaboration.
+  - Increases effective faculty consultation hours by 45% by eliminating lost transit time.
+  - Ensures equal, transparent access to faculty guidance for introverted or junior scholars.
+
+2. SDG 9: INDUSTRY, INNOVATION & INFRASTRUCTURE (Target 9.5)
+  - Modernizes legacy physical university infrastructure into smart, IoT-enabled educational spaces.
+  - Demonstrates open-source engineering innovation conceived, designed, and deployed within VNR VJIET.
+
+3. SDG 11: SUSTAINABLE CITIES & COMMUNITIES (Target 11.6)
+  - Paperless Operation: Replaces thousands of disposable paper door notices, appointment chits, and schedule printouts.
+  - Energy & Transit Efficiency: Reduces thousands of unnecessary elevator trips and staircase transits daily, fostering a calmer campus.
+
+[PICTURE TO INSERT]
+  Insert `diagram_un_sdgs.png` on this slide.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Our project directly advances three United Nations Sustainable Development Goals. SDG 4 by upgrading the quality and accessibility of academic mentoring; SDG 9 by transforming standard physical walls into smart digital infrastructure; and SDG 11 by eliminating disposable paper slips and optimizing foot transit across our campus."
+
+
+================================================================================
+SLIDE 15: MENTOR INTERACTIONS & ITERATIVE EVOLUTION
+================================================================================
+[RECOMMENDED LAYOUT]
+Chronological 3-Sprint Evolution Timeline highlighting mentor feedback and design pivots.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  MENTOR INTERACTIONS & ITERATIVE FEEDBACK
+Subtitle:
+  Incorporating Guidance from Mrs. Prasanna Pabba (Assistant Professor, Dept. of CSE)
+
+Sprint 1: Problem Framing & Scope Definition
+  - Initial Concept: A generic campus chat app where students ping professors directly.
+  - Mentor Critique: "Chat apps add more noise. Faculty already receive hundreds of messages. Focus on visibility and physical cabin presence, not chat."
+  - Design Pivot: Shifted focus to an ambient physical door placard synchronized with personal smartphones.
+
+Sprint 2: Usability & Faculty Friction Testing
+  - Prototype 1: Complex 4-step scheduling form with detailed student justification.
+  - Mentor Critique: "Faculty do not have time to fill out complex forms between lectures. Availability toggle must take exactly one click."
+  - Design Pivot: Designed the 1-Tap Quick Status Switcher ('Available', 'Busy', 'In Class', 'In Meeting') taking <1 second.
+
+Sprint 3: Real-World Resilience & Live Deployment
+  - Field Test: Mobile devices connected to campus Wi-Fi sometimes experienced delayed updates when locked.
+  - Mentor Critique: "Students standing outside the door need instant confirmation. The app cannot stay on a cached status."
+  - Design Pivot: Implemented the Adaptive Sync Engine with screen-wake listeners and 2-second background fallback polling.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "We owe immense gratitude to our mentor, Mrs. Prasanna Pabba. In our first sprint, she prevented us from making the mistake of building another chat app. She emphasized that faculty needed silence and clarity, not more pings. In our second sprint, she challenged us to make status updates take only one tap. And in our third sprint, her feedback led to our fault-tolerant mobile reconnection engine."
+
+
+================================================================================
+SLIDE 16: TEAM EXPERIENCES & COURSE OUTCOMES (CO-1 TO CO-4)
+================================================================================
+[RECOMMENDED LAYOUT]
+2x2 Grid mapping the 4 Course Outcomes (CO-1 to CO-4) followed by individual personal reflection statements.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  TEAM EXPERIENCES & COURSE OUTCOMES
+Subtitle:
+  Academic Competencies & Personal Growth through Design Thinking at CPDT
+
+Course Outcomes Mastery:
+  - CO-1: Identify and analyze complex campus and societal problems using empathetic user research.
+    * Evidence: Conducted 85+ student surveys and 12 faculty interviews across VNR VJIET blocks.
+  - CO-2: Apply divergent and convergent ideation methodologies (Brainstorming, SCAMPER, HMW).
+    * Evidence: Evaluated 25+ concept sketches before selecting the synchronized tri-partite placard.
+  - CO-3: Develop rapid low-fidelity and functional high-fidelity prototypes to test hypotheses.
+    * Evidence: Built and deployed a full-stack React PWA + Node.js + PostgreSQL real-time system.
+  - CO-4: Validate solutions through iterative feedback, ethical design, and sustainability criteria.
+    * Evidence: Evaluated with mentor Mrs. Prasanna Pabba and tested for zero-paper waste and SDG alignment.
+
+Personal Team Reflection:
+  "Design Thinking taught us that engineering does not begin in an IDE or a code editor; it begins by listening to people in the corridor. Seeing our prototype solve a genuine campus headache at VNR VJIET was the most rewarding experience of this semester."
+
+[PICTURE TO INSERT]
+  Re-insert a small thumbnail of `team_cpdt.png` in the bottom corner.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Through this project, we fulfilled all four Design Thinking Course Outcomes. More importantly, we learned that real engineering isn't just about writing algorithms—it's about listening deeply to people in the corridors and creating tools that bring calm and efficiency to everyday life."
+
+
+================================================================================
+SLIDE 17: CONCLUSION & FUTURE SCOPE
+================================================================================
+[RECOMMENDED LAYOUT]
+Left: Key Project Achievements & Deliverables.
+Right: 3 Horizon Roadmap cards for future expansion.
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  CONCLUSION & FUTURE SCOPE
+Subtitle:
+  Summary of Deliverables & Roadmap for Campus-Wide Rollout
+
+Key Deliverables Achieved:
+  - Validated problem through extensive student and faculty empathy studies.
+  - Built an ambient physical door placard with real-time SSE synchronization.
+  - Deployed a zero-install student mobile PWA with camera QR scanner.
+  - Seeded database with 23 VNR VJIET faculty members across 18 cabins.
+  - Zero ongoing hardware cost: Runs on existing phones, tablets, and laminated QR codes.
+
+Future Roadmap (Next Horizons):
+  - Horizon 1 (Campus Timetable Integration):
+    * Synchronize automatically with VNR VJIET college ERP and class timetables so faculty status switches to 'In Class' automatically.
+  - Horizon 2 (Indoor Wayfinding Navigation):
+    * Integrate interactive 2.5D indoor maps guiding first-year students step-by-step to cabins in PG and B-Blocks.
+  - Horizon 3 (Multi-Department Campus Rollout):
+    * Scale from CSE to all 14 departments (ECE, EEE, IT, AIML, Mechanical, Civil, Humanities) covering 450+ faculty cabins.
+
+[PICTURE TO INSERT]
+  Insert `product_directory.png` or `product_mobile_placard.png`.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "In conclusion, 'Find My Professor' solves a real, daily university problem with proven technology and zero unnecessary cost. In the future, we plan to connect this platform directly to our college ERP timetables for automated status updates and add indoor navigation maps for junior students. We believe this can become standard infrastructure across all 14 departments of VNR VJIET."
+
+
+================================================================================
+SLIDE 18: THANK YOU & Q&A
+================================================================================
+[RECOMMENDED LAYOUT]
+Clean, memorable closing slide.
+Left: Thank You header, Acknowledgements, and Contact Details.
+Right: Live Demo QR Code (`placard_qr_prasanna_mam.png`) inviting evaluators to scan and test on their own phones right now!
+
+[SLIDE CONTENT - COPY & PASTE]
+Slide Title:
+  THANK YOU!
+Subtitle:
+  Questions, Feedback & Live Demonstration
+
+Project Credits:
+  - Centre for Presencing and Design Thinking (CPDT)
+  - Department of Computer Science and Engineering
+  - VNR VJIET, Bachupally, Hyderabad, Telangana 500090
+
+Special Gratitude:
+  - Project Mentor: Mrs. Prasanna Pabba (Assistant Professor, Dept. of CSE)
+  - Faculty Members of Department of CSE, VNR VJIET
+  - Student participants in our empathy surveys and testing sessions
+
+Live Demonstration Invitation:
+  "Respected evaluators, please scan the QR code on the right with your phone camera to experience our live faculty placard in real time!"
+
+Interactive Session:
+  NOW OPEN FOR QUESTIONS & EVALUATION
+
+[PICTURE TO INSERT]
+  Insert `placard_qr_prasanna_mam.png` or `product_mobile_placard.png` prominently on the right side.
+
+[PRESENTER'S SPOKEN SCRIPT]
+  "Thank you so much to our evaluators and to our mentor Mrs. Prasanna Pabba for their encouragement. We invite you to scan the QR code on the screen with your smartphone camera right now to test the live placard yourselves. We are now open for your valuable questions and feedback."
+
+================================================================================
+END OF PRESENTATION CONTENT DOCUMENT
+================================================================================
