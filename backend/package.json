@@ -13,7 +13,9 @@
     "prisma:migrate": "prisma migrate deploy",
     "prisma:reset": "prisma migrate reset --force",
     "prisma:seed": "tsx prisma/seed.ts",
-    "test:legacy": "vitest run src/api.test.ts"
+    "test:legacy": "vitest run src/api.test.ts",
+    "render:build": "npm run --prefix .. render:build",
+    "render:start": "node ../scripts/prod-start.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
