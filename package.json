@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @wimp/backend\" \"npm run dev -w @wimp/frontend\"",
-    "build": "npm run prisma:generate -w @wimp/backend && npm run build -w @wimp/shared && npm run build -w @wimp/backend && npm run build -w @wimp/frontend",
+    "build": "npx prisma generate --schema backend/prisma/schema.prisma && npm run build -w @wimp/shared && npm run build -w @wimp/backend && npm run build -w @wimp/frontend",
     "test": "npm run test -w @wimp/shared && npm run test -w @wimp/backend",
     "db:up": "docker compose up -d",
     "db:migrate": "npm run prisma:migrate -w @wimp/backend",
@@ -20,7 +20,7 @@
     "demo:verify": "node scripts/verify-demo.mjs",
     "qr:generate": "node scripts/generate-qrs.mjs",
     "start": "node scripts/prod-start.mjs",
-    "render:build": "npm run build",
+    "render:build": "npm install && npx prisma generate --schema backend/prisma/schema.prisma && npm run build -w @wimp/shared && npm run build -w @wimp/backend && npm run build -w @wimp/frontend",
     "render:start": "node scripts/prod-start.mjs"
   },
   "devDependencies": {
