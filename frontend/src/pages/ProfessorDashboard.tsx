@@ -481,7 +481,6 @@ export function ProfessorDashboard() {
             </div>
           </div>
 
-          <div className="panel"><h3 className="font-semibold">You’re in control</h3><p className="muted text-sm mt-2">Your published status is pushed to student screens as soon as it is saved. Automatic refresh remains as a fallback. Weekly office hours help students plan ahead; they never override your status.</p></div>
           {/* PANEL 5: AUDIT TIMELINE */}
           <div className="rounded-3xl border border-violet-100 bg-white p-6 shadow-xs">
             <div className="flex items-center gap-2 border-b border-violet-100 pb-3">

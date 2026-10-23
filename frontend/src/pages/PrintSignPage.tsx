@@ -95,7 +95,7 @@ export function PrintSignPage() {
 
         <div className="border-t border-slate-200 pt-4 text-[10px] text-slate-400">
           <span>Permanent Office Identifier: <code>{token}</code></span>
-          <p className="mt-0.5">Where Is My Professor? · Official Campus Placard Network</p>
+          <p className="mt-0.5">VNR VJIET · Faculty Office Placard Network</p>
         </div>
       </div>
     </div>

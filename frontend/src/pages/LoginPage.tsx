@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { KeyRound, Lock, LogIn, Mail, Sparkles, UserPlus } from "lucide-react";
-import { DEMO_ACCOUNTS, useAuth } from "@/context/AuthContext";
+import { KeyRound, LogIn, Mail, UserPlus, Compass } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export function LoginPage() {
-  const { login, register, quickSwitch } = useAuth();
+  const { login, register } = useAuth();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -20,31 +20,20 @@ export function LoginPage() {
 
     try {
       if (mode === "login") {
-        const u = await login(email, password);
-        if (u.role === "PROFESSOR") navigate("/faculty/dashboard");
-        else if (u.role === "ADMINISTRATOR") navigate("/admin/dashboard");
-        else navigate("/student/portal");
+        const u = await login(email.trim(), password);
+        if (u.role === "PROFESSOR") {
+          navigate("/faculty/dashboard");
+        } else if (u.role === "ADMINISTRATOR") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/directory");
+        }
       } else {
-        await register(email, password);
-        navigate("/student/portal");
+        await register(email.trim(), password);
+        navigate("/directory");
       }
     } catch (err: any) {
-      setError(err.message || "Authentication failed");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleQuickLogin = async (accEmail: string, role: string) => {
-    setError(null);
-    setIsLoading(true);
-    try {
-      await quickSwitch(accEmail);
-      if (role === "PROFESSOR") navigate("/faculty/dashboard");
-      else if (role === "ADMINISTRATOR") navigate("/admin/dashboard");
-      else navigate("/student/portal");
-    } catch (err: any) {
-      setError(err.message || "Failed to switch account");
+      setError(err.message || "Authentication failed. Check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -56,16 +45,16 @@ export function LoginPage() {
         {/* Card */}
         <div className="rounded-3xl border border-violet-100 bg-white p-8 shadow-xl shadow-violet-950/5">
           <div className="text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-900 text-amber-300 border border-amber-300/40 shadow-md shadow-violet-950/20">
-              <Lock className="h-6 w-6" />
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-900 text-amber-300 border border-amber-300/40 shadow-md shadow-violet-950/20">
+              <Compass className="h-7 w-7" />
             </div>
             <h1 className="mt-4 text-2xl font-black tracking-tight text-violet-950">
-              {mode === "login" ? "Sign In to Campus Life" : "Create Student Account"}
+              {mode === "login" ? "Sign In to Campus Portal" : "Student Registration"}
             </h1>
             <p className="mt-1 text-xs text-slate-500">
               {mode === "login"
-                ? "Access professor status control, student meetings, or campus admin."
-                : "Register for student favorites, status radar, and consultation requests."}
+                ? "Sign in with your faculty or student credentials."
+                : "Create a student account to browse faculty and request consultations."}
             </p>
           </div>
 
@@ -93,7 +82,7 @@ export function LoginPage() {
                 mode === "register" ? "bg-white text-violet-950 font-bold shadow-xs" : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Register (Student)
+              Register as Student
             </button>
           </div>
 
@@ -111,16 +100,18 @@ export function LoginPage() {
                 <input
                   type="email"
                   required
-                  placeholder="name@demo.local"
+                  placeholder={mode === "login" ? "faculty@vnr.demo or student@example.com" : "student@example.com"}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 py-2 pl-10 pr-3 text-xs focus:border-violet-600 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-3 text-xs focus:border-violet-600 focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700">Password</label>
+              <label className="block text-xs font-semibold text-slate-700">
+                Password {mode === "register" && <span className="text-slate-400 font-normal">(min 8 characters)</span>}
+              </label>
               <div className="relative mt-1">
                 <KeyRound className="absolute left-3.5 top-2.5 h-4 w-4 text-violet-400" />
                 <input
@@ -129,7 +120,7 @@ export function LoginPage() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 py-2 pl-10 pr-3 text-xs focus:border-violet-600 focus:outline-none"
+                  className="w-full rounded-xl border border-slate-300 py-2.5 pl-10 pr-3 text-xs focus:border-violet-600 focus:outline-none"
                 />
               </div>
             </div>
@@ -137,41 +128,17 @@ export function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-900 py-2.5 text-xs font-bold text-white shadow-md shadow-violet-950/20 hover:bg-violet-800 transition disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-900 py-3 text-xs font-bold text-white shadow-md shadow-violet-950/20 hover:bg-violet-800 transition disabled:opacity-50"
             >
               {mode === "login" ? <LogIn className="h-4 w-4 text-amber-300" /> : <UserPlus className="h-4 w-4 text-amber-300" />}
-              <span>{isLoading ? "Authenticating..." : mode === "login" ? "Sign In" : "Register Account"}</span>
+              <span>{isLoading ? "Authenticating..." : mode === "login" ? "Sign In" : "Create Account"}</span>
             </button>
           </form>
 
-          {/* Quick Demo Switcher Section */}
-          <div className="mt-8 border-t border-violet-100 pt-5">
-            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-700">
-              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-              <span>Instant Demo Role Switch</span>
-            </div>
-            <p className="mt-0.5 text-[11px] text-slate-500">
-              Sign in instantly without typing passwords (Password: <code>DemoPass123!</code>):
+          <div className="mt-6 border-t border-slate-100 pt-4 text-center">
+            <p className="text-[11px] text-slate-400">
+              VNR VJIET · Where Is My Professor
             </p>
-
-            <div className="mt-3 grid grid-cols-1 gap-2">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.email}
-                  type="button"
-                  onClick={() => handleQuickLogin(acc.email, acc.role)}
-                  className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 p-2.5 text-left text-xs transition hover:border-violet-300 hover:bg-violet-50/50"
-                >
-                  <div>
-                    <span className="font-bold text-slate-800">{acc.label}</span>
-                    <span className="block text-[10px] text-slate-500">{acc.roleDescription}</span>
-                  </div>
-                  <span className="rounded-md bg-white px-2 py-0.5 text-[10px] font-bold text-violet-900 border border-violet-200 shadow-2xs">
-                    {acc.role}
-                  </span>
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </div>
