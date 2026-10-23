@@ -21,11 +21,13 @@ export function StudentPortal() {
   const { data: favData, isLoading: favLoading } = useQuery({
     queryKey: ["favorites"],
     queryFn: () => api.getFavorites(),
+    refetchInterval: 2500,
   });
 
   const { data: meetingsData, isLoading: meetingsLoading } = useQuery({
     queryKey: ["my-meetings"],
     queryFn: () => api.getMyMeetings(),
+    refetchInterval: 2500,
   });
 
   const cancelMutation = useMutation({

@@ -53,7 +53,7 @@ export function QrStatusPage() {
       }
       throw new Error("No token or slug provided");
     },
-    refetchInterval: 5000, // automatic live refresh every 15s
+    refetchInterval: 2000, // automatic live refresh every 2s
   });
 
   const { data: favoriteData, refetch: refreshFavorites } = useQuery({ queryKey: ['favorites', user?.id], queryFn: () => api.getFavorites(), enabled: user?.role === 'STUDENT' });
