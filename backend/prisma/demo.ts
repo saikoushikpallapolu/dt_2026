@@ -11,6 +11,92 @@ async function main() {
   for (const [email, role] of [['student@vnr.demo', 'STUDENT'], ['admin@vnr.demo', 'ADMINISTRATOR']] as const) {
     await db.user.upsert({ where: { email }, update: {}, create: { email, role, passwordHash } });
   }
+  const customProfessors = [
+    {
+      displayName: "Prasanna Mam",
+      email: "prasanna@vnr.demo",
+      slug: "prasanna",
+      designation: "Assistant Professor",
+      deptCode: "CSE",
+      deptName: "Computer Science & Engineering",
+      floor: "1",
+      room: "127",
+      buildingCode: "VNR-1",
+      buildingName: "Academic Block 1",
+    },
+    {
+      displayName: "Thirupathi Nanuvala Sir",
+      email: "thirupathi.nanuvala@vnr.demo",
+      slug: "thirupathi-nanuvala",
+      designation: "Associate Professor",
+      deptCode: "CSE",
+      deptName: "Computer Science & Engineering",
+      floor: "2",
+      room: "201",
+      buildingCode: "VNR-1",
+      buildingName: "Academic Block 1",
+    },
+    {
+      displayName: "Akhil Sir",
+      email: "akhil@vnr.demo",
+      slug: "akhil",
+      designation: "Assistant Professor",
+      deptCode: "CSE",
+      deptName: "Computer Science & Engineering",
+      floor: "G",
+      room: "031",
+      buildingCode: "VNR-1",
+      buildingName: "Academic Block 1",
+    },
+  ];
+
+  for (const cp of customProfessors) {
+    const dept = await db.department.upsert({ where: { code: cp.deptCode }, update: {}, create: { code: cp.deptCode, name: cp.deptName } });
+    const building = await db.building.upsert({ where: { code: cp.buildingCode }, update: {}, create: { code: cp.buildingCode, name: cp.buildingName } });
+    const office = await db.office.upsert({
+      where: { buildingId_floor_room: { buildingId: building.id, floor: cp.floor, room: cp.room } },
+      update: {},
+      create: { buildingId: building.id, floor: cp.floor, room: cp.room, label: `${cp.deptCode} Room ${cp.room}` }
+    });
+    const user = await db.user.upsert({ where: { email: cp.email }, update: {}, create: { email: cp.email, passwordHash, role: 'PROFESSOR' } });
+    const prof = await db.professor.upsert({
+      where: { slug: cp.slug },
+      update: { displayName: cp.displayName, designation: cp.designation, officeId: office.id, publicContact: cp.email },
+      create: {
+        userId: user.id,
+        slug: cp.slug,
+        displayName: cp.displayName,
+        designation: cp.designation,
+        departmentId: dept.id,
+        officeId: office.id,
+        publicContact: cp.email,
+        consultationDetails: 'Available for coursework assistance, project mentoring and student consultations. Check current status or request a meeting.'
+      }
+    });
+    await db.professorStatus.upsert({
+      where: { professorId: prof.id },
+      update: {},
+      create: {
+        professorId: prof.id,
+        status: 'AVAILABLE',
+        expiresAt: new Date(Date.now() + 8 * 3600000),
+        publicMessage: 'Welcome! Available for student consultations in Room ' + cp.room
+      }
+    });
+    await db.qrCode.upsert({ where: { token: `vnr-${cp.slug}` }, update: {}, create: { professorId: prof.id, token: `vnr-${cp.slug}` } });
+    if (!await db.officeHour.count({ where: { professorId: prof.id } })) {
+      await db.officeHour.createMany({
+        data: [1, 2, 3, 4, 5].map(dayOfWeek => ({
+          professorId: prof.id,
+          dayOfWeek,
+          startTime: '10:00',
+          endTime: '12:00',
+          notes: `Consultations in Room ${cp.room}`
+        }))
+      });
+    }
+  }
+
   for (let i = 0; i < names.length; i++) {
     const [code, name] = departments[Math.floor(i / 4)];
     const dept = await db.department.upsert({ where: { code }, update: {}, create: { code, name } });
@@ -28,6 +114,6 @@ async function main() {
     await db.qrCode.upsert({ where: { token: `vnr-${slug}` }, update: {}, create: { professorId: prof.id, token: `vnr-${slug}` } });
     if (!await db.officeHour.count({ where: { professorId: prof.id } })) await db.officeHour.createMany({ data: [1, 2, 3, 4, 5].map(dayOfWeek => ({ professorId: prof.id, dayOfWeek, startTime: i % 2 ? '14:00' : '10:00', endTime: i % 2 ? '16:00' : '12:00', notes: 'Coursework, projects & academic mentoring' })) });
   }
-  console.log('20 fictional VNR demo faculty provisioned. Existing records preserved. Password: DemoPass123!');
+  console.log('Campus faculty provisioned (including Prasanna Mam, Thirupathi Nanuvala Sir, Akhil Sir). Password: DemoPass123!');
 }
 main().finally(() => db.$disconnect());

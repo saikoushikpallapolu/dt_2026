@@ -12,15 +12,21 @@ export interface DemoAccount {
 
 export const DEMO_ACCOUNTS: DemoAccount[] = [
   {
-    label: "Dr. Ananya Reddy",
-    roleDescription: "Professor & HOD · CSE",
-    email: "ananya.reddy@vnr.demo",
+    label: "Prasanna Mam",
+    roleDescription: "CSE · Room 127",
+    email: "prasanna@vnr.demo",
     role: "PROFESSOR",
   },
   {
-    label: "Dr. Vikram Rao",
-    roleDescription: "Associate Professor · CSE",
-    email: "vikram.rao@vnr.demo",
+    label: "Thirupathi Nanuvala Sir",
+    roleDescription: "CSE · Room 201",
+    email: "thirupathi.nanuvala@vnr.demo",
+    role: "PROFESSOR",
+  },
+  {
+    label: "Akhil Sir",
+    roleDescription: "CSE · Room 031",
+    email: "akhil@vnr.demo",
     role: "PROFESSOR",
   },
   {
