@@ -16,6 +16,7 @@ import {
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatusBadge } from "@/components/StatusBadge";
 import { api } from "@/lib/api";
+import { broadcastCampusChange } from "@/components/LiveSync";
 import type { FacultyStatus } from "@wimp/shared";
 
 export function ProfessorDashboard() {
@@ -24,6 +25,9 @@ export function ProfessorDashboard() {
   const { data: statusData, isLoading } = useQuery({
     queryKey: ["professor-status"],
     queryFn: () => api.getMyStatus(),
+    refetchInterval: 2000,
+    refetchIntervalInBackground: true,
+    staleTime: 0,
   });
 
   const { data: historyData } = useQuery({
@@ -77,8 +81,12 @@ export function ProfessorDashboard() {
       queryClient.invalidateQueries({ queryKey: ["professor-status"] });
       queryClient.invalidateQueries({ queryKey: ["professor-history"] });
       queryClient.invalidateQueries({ queryKey: ["qr-status"] });
+      queryClient.invalidateQueries({ queryKey: ["qr-sign"] });
+      queryClient.invalidateQueries({ queryKey: ["scanner-faculty"] });
       queryClient.invalidateQueries({ queryKey: ["faculty-directory"] });
-      setStatusFeedback("Saved to database. Student profiles are updating live.");
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+      broadcastCampusChange();
+      setStatusFeedback("Saved to database. Student profiles and placards are updating live.");
       setTimeout(() => setStatusFeedback(null), 4000);
     },
     onError: (err: any) => {

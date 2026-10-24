@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Html5Qrcode } from 'html5-qrcode';
 import { X, ArrowRight, Camera, Upload } from 'lucide-react';
 import { api } from '@/lib/api';
 
 export function QrScannerModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [tab, setTab] = useState<'camera' | 'upload' | 'directory'>('camera');
   const [error, setError] = useState('');
   const [manual, setManual] = useState('');
@@ -29,6 +30,8 @@ export function QrScannerModal({ isOpen, onClose }: { isOpen: boolean; onClose: 
     }
     if (handled.current) return;
     handled.current = true;
+    void queryClient.invalidateQueries({ queryKey: ['qr-status'] });
+    queryClient.removeQueries({ queryKey: ['qr-status'] });
     onClose();
     navigate(path);
   }

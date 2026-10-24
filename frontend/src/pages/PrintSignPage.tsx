@@ -10,6 +10,9 @@ export function PrintSignPage() {
     queryKey: ["qr-sign", token],
     queryFn: () => api.getQrStatus(token!),
     enabled: !!token,
+    refetchInterval: 2000,
+    refetchIntervalInBackground: true,
+    staleTime: 0,
   });
 
   if (isLoading) {

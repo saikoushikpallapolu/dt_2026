@@ -40,17 +40,50 @@ export function createApp(appEnv: AppEnv) {
   app.use(cookieParser());
   app.use(authenticateSession);
 
-  app.use('/api/v1', (_req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
+  app.use('/api/v1', (_req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+  });
+
   app.get('/api/v1/events', (req, res) => {
     res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.flushHeaders();
-    const send = () => res.write('event: campus-change\ndata: {}\n\n');
-    res.write('retry: 1000\nevent: connected\ndata: {}\n\n');
-    liveUpdates.on('change', send);
-    const heartbeat = setInterval(() => res.write(': heartbeat\n\n'), 15000);
-    req.on('close', () => { clearInterval(heartbeat); liveUpdates.off('change', send); });
+
+    const sendChange = () => {
+      try {
+        res.write(`event: campus-change\ndata: {"time":${Date.now()}}\n\n`);
+        (res as any).flush?.();
+      } catch {
+        // Socket closed
+      }
+    };
+
+    res.write(`retry: 1000\nevent: connected\ndata: {"time":${Date.now()}}\n\n`);
+    (res as any).flush?.();
+
+    liveUpdates.on('change', sendChange);
+    const heartbeat = setInterval(() => {
+      try {
+        res.write(`: heartbeat ${Date.now()}\n\n`);
+        (res as any).flush?.();
+      } catch {
+        // Socket closed
+      }
+    }, 15000);
+
+    const cleanup = () => {
+      clearInterval(heartbeat);
+      liveUpdates.off('change', sendChange);
+    };
+
+    req.on('close', cleanup);
+    res.on('close', cleanup);
   });
   // Health and meta endpoints
   app.get("/health", (_req, res) => {

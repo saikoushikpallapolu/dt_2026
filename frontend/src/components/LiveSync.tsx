@@ -1,6 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
+const campusChannel = typeof window !== 'undefined' && 'BroadcastChannel' in window
+  ? new BroadcastChannel('campus-sync')
+  : null;
+
+export function broadcastCampusChange() {
+  try {
+    campusChannel?.postMessage({ type: 'CAMPUS_UPDATE', timestamp: Date.now() });
+  } catch (err) {
+    // Ignore cross-tab broadcast error
+  }
+}
+
 export function LiveSync() {
   const client = useQueryClient();
   const reconnectTimeoutRef = useRef<any>(null);
@@ -11,9 +23,19 @@ export function LiveSync() {
 
     const refresh = () => {
       void client.invalidateQueries();
-      void client.refetchQueries({ type: 'active' });
+      void client.refetchQueries({ type: 'active', stale: false });
     };
 
+    // 1. Cross-tab instant update listener
+    if (campusChannel) {
+      campusChannel.onmessage = (event) => {
+        if (event.data?.type === 'CAMPUS_UPDATE') {
+          refresh();
+        }
+      };
+    }
+
+    // 2. Server-Sent Events (SSE) listener
     const connect = () => {
       if (!isMounted) return;
       if (stream) {
@@ -36,13 +58,13 @@ export function LiveSync() {
         };
 
         stream.onerror = () => {
-          if (stream) {
+          // If the connection was closed by browser or network, reconnect
+          if (stream?.readyState === EventSource.CLOSED) {
             stream.close();
             stream = null;
+            clearTimeout(reconnectTimeoutRef.current);
+            reconnectTimeoutRef.current = setTimeout(connect, 2000);
           }
-          // Auto reconnect after 2 seconds
-          clearTimeout(reconnectTimeoutRef.current);
-          reconnectTimeoutRef.current = setTimeout(connect, 2000);
         };
       } catch (err) {
         console.warn('[LiveSync] EventSource setup error:', err);
@@ -53,20 +75,22 @@ export function LiveSync() {
 
     connect();
 
-    // Mobile screen wake/focus triggers immediate refresh & reconnect
+    // 3. Screen focus/wake listener: immediate live refresh
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
         refresh();
-        connect();
+        if (!stream || stream.readyState === EventSource.CLOSED) {
+          connect();
+        }
       }
     };
 
-    // Background interval: every 3s refresh active queries on screen (mobile fallback)
+    // 4. Background polling fallback (ensures active view is strictly synchronized every 2s)
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        void client.refetchQueries({ type: 'active' });
+        void client.refetchQueries({ type: 'active', stale: false });
       }
-    }, 3000);
+    }, 2000);
 
     window.addEventListener('online', connect);
     window.addEventListener('focus', handleVisibility);
@@ -85,3 +109,4 @@ export function LiveSync() {
 
   return null;
 }
+

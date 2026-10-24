@@ -9,6 +9,9 @@ export function createQrRouter(appEnv: AppEnv): Router {
   const router = Router();
 
   router.get("/:token", async (req, res, next) => {
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
     try {
       const { token } = req.params;
 
@@ -154,7 +157,11 @@ export function createQrRouter(appEnv: AppEnv): Router {
       } catch {
         // ignore parse error
       }
-      const clientOrigin = originFromQuery || originFromHeader || appEnv.PUBLIC_BASE_URL;
+
+      const forwardedProto = req.get("x-forwarded-proto") || req.protocol || "https";
+      const forwardedHost = req.get("x-forwarded-host") || req.get("host");
+      const hostOrigin = forwardedHost ? `${forwardedProto}://${forwardedHost}` : null;
+      const clientOrigin = originFromQuery || originFromHeader || hostOrigin || appEnv.PUBLIC_BASE_URL;
       
       // If client origin is localhost/127.0.0.1, auto-substitute machine's Wi-Fi/LAN IPv4
       // so native mobile phone cameras scanning the monitor screen can reach the web app
