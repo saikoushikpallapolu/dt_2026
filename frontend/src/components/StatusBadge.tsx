@@ -15,7 +15,8 @@ export function StatusBadge({
   isConfidentlyCurrent,
   size = "md",
 }: StatusBadgeProps) {
-  const label = FACULTY_STATUS_LABELS[status] || status;
+  const safeStatus = status || ("UNKNOWN" as FacultyStatus);
+  const label = FACULTY_STATUS_LABELS[safeStatus] || safeStatus || "Unknown";
 
   const sizeClasses = {
     sm: "px-2.5 py-0.5 text-xs font-medium",

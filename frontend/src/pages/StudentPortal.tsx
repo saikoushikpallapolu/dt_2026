@@ -124,9 +124,9 @@ export function StudentPortal() {
 
                       <div className="mt-2 flex items-center gap-2">
                         <StatusBadge
-                          status={prof.currentStatus.status as FacultyStatus}
-                          isExpired={prof.currentStatus.isExpired}
-                          isConfidentlyCurrent={prof.currentStatus.isConfidentlyCurrent}
+                          status={(prof.currentStatus?.status || "UNKNOWN") as FacultyStatus}
+                          isExpired={prof.currentStatus?.isExpired}
+                          isConfidentlyCurrent={prof.currentStatus?.isConfidentlyCurrent}
                           size="sm"
                         />
                       </div>

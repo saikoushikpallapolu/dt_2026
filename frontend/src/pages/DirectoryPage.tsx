@@ -189,9 +189,9 @@ export function DirectoryPage() {
                   {/* Status Pill */}
                   <div className="mt-4">
                     <StatusBadge
-                      status={prof.currentStatus.status as FacultyStatus}
-                      isExpired={prof.currentStatus.isExpired}
-                      isConfidentlyCurrent={prof.currentStatus.isConfidentlyCurrent}
+                      status={(prof.currentStatus?.status || "UNKNOWN") as FacultyStatus}
+                      isExpired={prof.currentStatus?.isExpired}
+                      isConfidentlyCurrent={prof.currentStatus?.isConfidentlyCurrent}
                       size="sm"
                     />
                   </div>

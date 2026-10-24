@@ -61,7 +61,7 @@ export function QrStatusPage() {
   });
 
   const { data: favoriteData, refetch: refreshFavorites } = useQuery({ queryKey: ['favorites', user?.id], queryFn: () => api.getFavorites(), enabled: user?.role === 'STUDENT' });
-  const currentFav = favoriteData?.favorites.find(p => p.id === data?.professor.id);
+  const currentFav = favoriteData?.favorites?.find(p => p.id === data?.professor?.id);
   const isFavorited = !!currentFav;
   const notifyEnabled = !!(currentFav as any)?.notifyWhenAvailable;
 
@@ -171,8 +171,19 @@ export function QrStatusPage() {
     );
   }
 
-  const { professor, status, officeHours } = data;
-  const isExpired = status.isExpired;
+  const professor = data.professor;
+  const status = data.status || {
+    status: "UNKNOWN",
+    expectedReturnAt: null,
+    alternateLocation: null,
+    publicMessage: null,
+    expiresAt: null,
+    updatedAt: new Date().toISOString(),
+    isExpired: false,
+    isConfidentlyCurrent: false,
+  };
+  const officeHours = data.officeHours || [];
+  const isExpired = !!status.isExpired;
 
   // Format return time
   let returnTimeLabel = null;
@@ -181,7 +192,9 @@ export function QrStatusPage() {
     const now = new Date();
     const diffMins = Math.round((returnDate.getTime() - now.getTime()) / 60000);
 
-    const timeStr = returnDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    const timeStr = !isNaN(returnDate.getTime())
+      ? returnDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      : "";
     if (diffMins > 0) {
       returnTimeLabel = `${timeStr} (in ~${diffMins} mins)`;
     } else {
@@ -285,7 +298,7 @@ export function QrStatusPage() {
                   Current Published Status
                 </span>
                 <span className="text-[11px] text-slate-400">
-                  Updated {new Date(status.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  Updated {status.updatedAt ? new Date(status.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "Just now"}
                 </span>
               </div>
 
@@ -307,7 +320,7 @@ export function QrStatusPage() {
                       <p className="font-bold">Status Stale / Not Recently Confirmed</p>
                       <p className="mt-0.5 text-amber-800">
                         This self-reported status passed its validity duration (
-                        {new Date(status.expiresAt || status.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {new Date(status.expiresAt || status.updatedAt || Date.now()).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                         ). The professor may have finished class or left the office.
                       </p>
                     </div>
@@ -435,8 +448,8 @@ export function QrStatusPage() {
                         </p>
                         <p className="text-[11px] text-slate-600">
                           {notifyEnabled
-                            ? `You will be alerted instantly when ${professor.user.displayName || professor.user.name} returns to office.`
-                            : `Get an instant alert the moment ${professor.user.displayName || professor.user.name} marks their status as Available.`}
+                            ? `You will be alerted instantly when ${professor.displayName} returns to office.`
+                            : `Get an instant alert the moment ${professor.displayName} marks their status as Available.`}
                         </p>
                       </div>
                     </div>
