@@ -13,6 +13,7 @@ if (!fs.existsSync(clientDist)) {
     execSync('npm run build', { stdio: 'inherit', cwd: rootDir });
   } catch (err) {
     console.error('[prod-start] Failed to build frontend:', err.message);
+    process.exit(1);
   }
 }
 
@@ -24,7 +25,8 @@ if (process.env.DATABASE_URL) {
     console.log('[prod-start] Ensuring demo faculty accounts exist...');
     execSync('npx tsx backend/prisma/demo.ts', { stdio: 'inherit', cwd: rootDir });
   } catch (err) {
-    console.warn('[prod-start] Notice running migrations/seed:', err.message);
+    console.error('[prod-start] Database initialization failed:', err.message);
+    process.exit(1);
   }
 }
 

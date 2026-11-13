@@ -60,3 +60,19 @@ Office hours are recurring IST windows for planning. Consultation requests can p
 
 This is a functional local demonstration, not a production certification. Before a college launch: provision managed PostgreSQL and backups, deploy frontend/API behind one HTTPS origin with /api proxying, replace demo accounts/role switching with college SSO, enforce secure cookies and approved origins, add authentication throttling and monitoring, and perform a security/accessibility/load review. Use a database-level exclusion constraint or serializable retry for concurrent booking acceptance before production scale. No email, push notifications, GPS, or native Android/iOS package is claimed.
 
+
+## Hosted mobile demo
+
+App: https://dt-2026.onrender.com (Render deployment supplied by project owner).
+
+Use a teacher browser and a separate student phone/browser. Sign in as ananya.reddy@vnr.demo and student@vnr.demo respectively, password DemoPass123!.
+
+1. On the phone, open /qr/vnr-ananya-reddy and leave it open.
+2. On the teacher dashboard, publish a status and public note. The phone updates without reloading.
+3. Edit Weekly class timetable: choose day, start/end, subject and classroom in the note, then Publish class timetable. Students see it under Weekly class timetable.
+4. Edit and publish Weekly office hours. Students see the revised slots and next consultation window.
+5. Request a consultation as the student, accept as the teacher, then observe the student's meeting state and notification.
+
+Timetables persist in PostgreSQL AppSetting records per professor; schedule writes include audit records and broadcast after the database transaction commits. Publishing an empty office-hour schedule remains empty across demo seed/startup. Class timetable entries are planning information; current availability remains teacher-reported.
+
+Run `node scripts/verify-dynamic-mobile.mjs` while the local demo runs to check the timetable editor, status/slot propagation, polling fallback, mobile widths, persistence and write permissions. Verification restores original schedules/status and leaves audit records. The script supports APP_URL for another deployment; it performs reversible demo-account writes.

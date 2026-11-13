@@ -241,6 +241,7 @@ export function createMeetingsRouter(): Router {
         return m;
       });
 
+      publishCampusChange();
       res.json({ ok: true, meeting: updated });
     } catch (err) {
       next(err);

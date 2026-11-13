@@ -327,6 +327,12 @@ export const api = {
     });
   },
 
+  async getTimetable(slug: string): Promise<{ classes: { dayOfWeek: number; startTime: string; endTime: string; notes?: string | null }[]; updatedAt: string | null }> {
+    return request(`/faculty/${encodeURIComponent(slug)}/timetable`);
+  },
+  async saveTimetable(classes: { dayOfWeek: number; startTime: string; endTime: string; notes?: string | null }[]): Promise<{ ok: boolean }> {
+    return request('/faculty/me/timetable', { method: 'PUT', body: JSON.stringify({ classes }) });
+  },
   async getMySchedules(): Promise<{ classes: any[]; officeHours: any[] }> {
     return request("/faculty/me/schedules");
   },

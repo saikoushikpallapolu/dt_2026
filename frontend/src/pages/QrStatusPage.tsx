@@ -60,6 +60,8 @@ export function QrStatusPage() {
     staleTime: 0,
   });
 
+  const timetable = useQuery({ queryKey: ['public-timetable', data?.professor?.slug], queryFn: () => api.getTimetable(data!.professor.slug), enabled: !!data?.professor?.slug });
+
   const { data: favoriteData, refetch: refreshFavorites } = useQuery({ queryKey: ['favorites', user?.id], queryFn: () => api.getFavorites(), enabled: user?.role === 'STUDENT' });
   const currentFav = favoriteData?.favorites?.find(p => p.id === data?.professor?.id);
   const isFavorited = !!currentFav;
@@ -469,6 +471,11 @@ export function QrStatusPage() {
               )}
             </div>
 
+            <section className="rounded-2xl border border-violet-100 p-5 bg-white shadow-2xs" aria-label="Class timetable">
+              <h2 className="font-bold text-sm">Weekly class timetable · IST</h2>
+              <p className="text-xs text-slate-500 mt-1">Published by faculty. Updates appear automatically.</p>
+              {timetable.isError ? <p role="alert">Unable to load timetable. Reconnecting…</p> : timetable.isPending ? <p>Loading timetable…</p> : !timetable.data?.classes.length ? <p className="text-xs mt-3 text-slate-500">No classes published yet.</p> : timetable.data.classes.map((slot, index) => <div key={index} className="flex flex-wrap justify-between gap-2 border-t border-slate-100 py-3 text-xs mt-2"><strong>{days[slot.dayOfWeek]}</strong><span>{slot.startTime} – {slot.endTime}</span><span className="w-full text-slate-600">{slot.notes}</span></div>)}
+            </section>
             <NextAvailability slots={officeHours || []} />
             {/* Office Hours Section */}
             {officeHours && officeHours.length > 0 && (

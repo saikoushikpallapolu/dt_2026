@@ -23,7 +23,6 @@ export function LiveSync() {
 
     const refresh = () => {
       void client.invalidateQueries();
-      void client.refetchQueries({ type: 'active', stale: false });
     };
 
     // 1. Cross-tab instant update listener
@@ -88,7 +87,7 @@ export function LiveSync() {
     // 4. Background polling fallback (ensures active view is strictly synchronized every 2s)
     const interval = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        void client.refetchQueries({ type: 'active', stale: false });
+        void client.refetchQueries({ type: 'active' });
       }
     }, 2000);
 
@@ -101,6 +100,7 @@ export function LiveSync() {
       clearInterval(interval);
       clearTimeout(reconnectTimeoutRef.current);
       if (stream) stream.close();
+      if (campusChannel) campusChannel.onmessage = null;
       window.removeEventListener('online', connect);
       window.removeEventListener('focus', handleVisibility);
       document.removeEventListener('visibilitychange', handleVisibility);

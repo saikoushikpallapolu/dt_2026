@@ -5,7 +5,7 @@ import { FacultyStatus, MeetingRequestStatus } from "@prisma/client";
 import { prisma } from "../db.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { formatStatusDetail, updateProfessorStatus } from "../services/status-service.js";
-import { runAutomationSync, FACULTY_CLASS_SCHEDULES } from "../services/automation-service.js";
+import { runAutomationSync } from "../services/automation-service.js";
 import type { AppEnv } from "../config/env.js";
 
 import { officeHoursSchema } from "../services/office-hours.js";
@@ -493,6 +493,7 @@ export function createFacultyRouter(appEnv: AppEnv): Router {
           return m;
         });
 
+        publishCampusChange();
         res.json({ ok: true, request: updated });
       } catch (err) {
         next(err);
@@ -513,9 +514,36 @@ export function createFacultyRouter(appEnv: AppEnv): Router {
       await prisma.$transaction(async tx => {
         await tx.officeHour.deleteMany({ where: { professorId: professor.id } });
         await tx.officeHour.createMany({ data: parsed.data.officeHours.map(slot => ({ ...slot, professorId: professor.id })) });
+        await tx.auditLog.create({ data: { actorUserId: req.user!.id, action: "OFFICE_HOURS_UPDATED", entityType: "Professor", entityId: professor.id, metadata: { slots: parsed.data.officeHours } } });
+        await tx.appSetting.upsert({ where: { key: `office-hours-published:${professor.id}` }, create: { key: `office-hours-published:${professor.id}`, value: true }, update: { value: true } });
       });
       publishCampusChange();
       res.json({ ok: true });
+    } catch (err) { next(err); }
+  });
+
+  router.put("/me/timetable", requireAuth, requireRole("PROFESSOR"), async (req, res, next) => {
+    try {
+      const parsed = officeHoursSchema.safeParse({ officeHours: req.body.classes });
+      if (!parsed.success) { res.status(400).json({ error: { code: "VALIDATION_ERROR", message: parsed.error.issues[0].message.replace('Office hours', 'Classes') } }); return; }
+      const professor = await prisma.professor.findUnique({ where: { userId: req.user!.id } });
+      if (!professor) { res.status(404).json({ error: { message: "Professor not found" } }); return; }
+      const classes = parsed.data.officeHours.sort((a, b) => a.dayOfWeek - b.dayOfWeek || a.startTime.localeCompare(b.startTime));
+      await prisma.$transaction(async tx => {
+        await tx.appSetting.upsert({ where: { key: `timetable:${professor.id}` }, create: { key: `timetable:${professor.id}`, value: classes }, update: { value: classes } });
+        await tx.auditLog.create({ data: { actorUserId: req.user!.id, action: "TIMETABLE_UPDATED", entityType: "Professor", entityId: professor.id, metadata: { classes } } });
+      });
+      publishCampusChange();
+      res.json({ ok: true });
+    } catch (err) { next(err); }
+  });
+
+  router.get("/:slug/timetable", async (req, res, next) => {
+    try {
+      const professor = await prisma.professor.findUnique({ where: { slug: req.params.slug } });
+      if (!professor || professor.visibility !== "PUBLIC") { res.status(404).json({ error: { message: "Professor not found" } }); return; }
+      const timetable = await prisma.appSetting.findUnique({ where: { key: `timetable:${professor.id}` } });
+      res.json({ classes: timetable?.value || [], updatedAt: timetable?.updatedAt || null });
     } catch (err) { next(err); }
   });
 
@@ -690,7 +718,8 @@ export function createFacultyRouter(appEnv: AppEnv): Router {
         return;
       }
 
-      const classes = FACULTY_CLASS_SCHEDULES.filter((cls) => cls.professorSlug === professor.slug);
+      const timetable = await prisma.appSetting.findUnique({ where: { key: `timetable:${professor.id}` } });
+      const classes = timetable?.value || [];
 
       res.json({
         classes,

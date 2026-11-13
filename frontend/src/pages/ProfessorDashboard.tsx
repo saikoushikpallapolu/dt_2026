@@ -177,6 +177,7 @@ export function ProfessorDashboard() {
       }
     >
       <OfficeHoursEditor />
+      <OfficeHoursEditor timetable />
       {/* Feedback banner */}
       {statusFeedback && (
         <div className="mb-6 rounded-2xl border border-emerald-300 bg-emerald-50/90 p-4 text-xs font-semibold text-emerald-900 shadow-sm flex items-center gap-2.5">

@@ -29,7 +29,7 @@ export function NextAvailability({ slots }: { slots?: Slot[] | null }) {
     const [eh, em] = (s.endTime || "00:00").split(":").map(Number);
     const startMins = (sh || 0) * 60 + (sm || 0);
     const endMins = (eh || 0) * 60 + (em || 0);
-    return minutes >= startMins && minutes <= endMins;
+    return minutes >= startMins && minutes < endMins;
   });
 
   if (activeSlot) {

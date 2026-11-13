@@ -84,7 +84,7 @@ async function main() {
       }
     });
     await db.qrCode.upsert({ where: { token: `vnr-${cp.slug}` }, update: {}, create: { professorId: prof.id, token: `vnr-${cp.slug}` } });
-    if (!await db.officeHour.count({ where: { professorId: prof.id } })) {
+    if (!await db.officeHour.count({ where: { professorId: prof.id } }) && !await db.appSetting.findUnique({ where: { key: `office-hours-published:${prof.id}` } })) {
       await db.officeHour.createMany({
         data: [1, 2, 3, 4, 5].map(dayOfWeek => ({
           professorId: prof.id,
@@ -112,7 +112,7 @@ async function main() {
     const status: FacultyStatus = (['AVAILABLE', 'IN_CLASS', 'AVAILABLE', 'IN_MEETING', 'AWAY'] as const)[i % 5];
     await db.professorStatus.upsert({ where: { professorId: prof.id }, update: {}, create: { professorId: prof.id, status, expiresAt: new Date(Date.now() + 8 * 3600000), expectedReturnAt: status === 'AVAILABLE' ? null : new Date(Date.now() + (30 + i * 5) * 60000), publicMessage: status === 'AVAILABLE' ? 'Welcome! Available for student consultations.' : 'Please check my office hours or send a meeting request.' } });
     await db.qrCode.upsert({ where: { token: `vnr-${slug}` }, update: {}, create: { professorId: prof.id, token: `vnr-${slug}` } });
-    if (!await db.officeHour.count({ where: { professorId: prof.id } })) await db.officeHour.createMany({ data: [1, 2, 3, 4, 5].map(dayOfWeek => ({ professorId: prof.id, dayOfWeek, startTime: i % 2 ? '14:00' : '10:00', endTime: i % 2 ? '16:00' : '12:00', notes: 'Coursework, projects & academic mentoring' })) });
+    if (!await db.officeHour.count({ where: { professorId: prof.id } }) && !await db.appSetting.findUnique({ where: { key: `office-hours-published:${prof.id}` } })) await db.officeHour.createMany({ data: [1, 2, 3, 4, 5].map(dayOfWeek => ({ professorId: prof.id, dayOfWeek, startTime: i % 2 ? '14:00' : '10:00', endTime: i % 2 ? '16:00' : '12:00', notes: 'Coursework, projects & academic mentoring' })) });
   }
   console.log('Campus faculty provisioned (including Prasanna Mam, Thirupathi Nanuvala Sir, Akhil Sir). Password: DemoPass123!');
 }
