@@ -1,3 +1,5 @@
 qa/
+qa-*/
 __pycache__/
 render_word_qa.py
+render_*_qa.py
