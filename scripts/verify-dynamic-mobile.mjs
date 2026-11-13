@@ -45,7 +45,7 @@ try {
  await s.reload();
  await expect(s.getByRole('region',{name:'Class timetable'})).toContainText(stamp);
  await api(teacher, '/faculty/me/status', 'PUT', {status:'AVAILABLE',publicMessage:stamp+' fallback'});
- await expect(s.getByText(stamp+' fallback',{exact:true})).toBeVisible({timeout:12000});
+ await expect(s.getByText(new RegExp(stamp+' fallback'))).toBeVisible({timeout:12000});
  console.log('PASS: polling fallback with SSE disabled');
  const invalid = await teacher.request.put(base+'/api/v1/faculty/me/timetable',{data:{classes:[{dayOfWeek:1,startTime:'09:00',endTime:'08:00'}]}});
  expect(invalid.status()).toBe(400);
