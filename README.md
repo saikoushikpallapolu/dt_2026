@@ -1,78 +1,216 @@
-# Find my professor · VNR VJIET
+<div align="center">
 
-A working campus demo with a React/TypeScript mobile-responsive web app, Express API, PostgreSQL persistence and role-based cookie sessions. Violet-and-gold visual design.
+# Find My Professor
 
-## Start the demo
+**Check faculty availability before you make the trip.**
 
-From this directory, run:
+A campus web app connecting students and faculty through live availability, QR-linked profiles, published schedules, and consultation requests.
 
-```powershell
+[![Production verification](https://github.com/saikoushikpallapolu/Find-My-Professor/actions/workflows/render-production.yml/badge.svg?branch=main)](https://github.com/saikoushikpallapolu/Find-My-Professor/actions/workflows/render-production.yml) ![React](https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+
+[Open the app](https://dt-2026.onrender.com) · [Explore a profile](https://dt-2026.onrender.com/qr/vnr-ananya-reddy) · [Run locally](#run-locally) · [Try the live workflow](#try-the-live-workflow)
+
+</div>
+
+<a href="https://dt-2026.onrender.com/directory">
+  <img src="presentation_assets/product_directory.png" alt="Faculty directory with name search, department and status filters, office locations, and profile links" width="100%">
+</a>
+
+## The problem
+
+A student needs a project review, a signature, or help with coursework. They walk to a professor's cabin, only to find that the professor is teaching, in a meeting, or away. A nameplate identifies the office but cannot explain whether to visit now or when to return. Faculty receive the same availability questions repeatedly, alongside unplanned interruptions.
+
+**Find My Professor makes that information available before the visit.** Teachers publish their status and consultation hours in one place. Students check the directory or scan a door QR, read the latest report, and request a meeting when a drop-in is unsuitable.
+
+| Campus friction | How the app addresses it |
+| --- | --- |
+| Uncertainty before walking to an office | A public profile shows published availability, update time, office location, and an optional return estimate. |
+| Paper notices become outdated | A stable QR opens a database-backed profile that changes without reprinting the code. |
+| Consultation plans are scattered across messages | Weekly hours and dated meeting requests provide a structured planning workflow. |
+| Students cannot tell whether a request was approved | Pending, accepted, declined, and cancelled states make the outcome visible. |
+
+The intended outcome is fewer unnecessary visits and clearer communication. Actual time savings and adoption need to be measured in a campus pilot.
+
+## Product tour
+
+### A workspace for faculty
+
+Publish recurring office hours, update availability, and respond to consultation requests. Student profiles reflect saved changes through live refreshes.
+
+![Faculty workspace with the weekly office-hour editor, publish controls, status options, and live placard preview](presentation_assets/product_workspace.png)
+
+### A profile students can open anywhere
+
+The same faculty identity works through the directory, a direct link, and a printed QR. Desktop and mobile views present status, notes, office details, and consultation information.
+
+<table>
+  <tr><th>Faculty profile</th><th>Mobile experience</th></tr>
+  <tr>
+    <td width="68%" valign="top"><img src="presentation_assets/product_placard.png" alt="Desktop faculty profile showing a meeting status, teacher note, and posted consultation hours" width="100%"></td>
+    <td width="32%" valign="top"><img src="presentation_assets/product_mobile_placard.png" alt="Mobile faculty profile with published status, location, teacher note, and bottom navigation" width="100%"></td>
+  </tr>
+</table>
+
+<sub>Screenshots are demo captures with sample identities, rooms, and schedules. The current app also includes a weekly class timetable.</sub>
+
+## What you can do
+
+| Role | Capabilities |
+| --- | --- |
+| **Student** | Search and filter faculty; view public profiles; scan QR codes; bookmark professors; subscribe to availability notifications; request, track, and cancel consultations. |
+| **Professor** | Publish status, a public note, alternate location, and expected return; edit weekly office hours and class timetable; accept or decline requests; review status history. |
+| **Administrator** | Manage faculty, departments, buildings, and offices; generate or revoke QR codes; inspect analytics and audit records. |
+
+Public profiles do not require a login. Personal actions require the appropriate account, with permissions enforced on the server.
+
+## Try the live workflow
+
+Open the [teacher dashboard](https://dt-2026.onrender.com/faculty/dashboard) on one device and [Ananya's student-facing profile](https://dt-2026.onrender.com/qr/vnr-ananya-reddy) on another.
+
+1. **Publish a status.** Sign in as Ananya, choose **In Class**, add a distinctive note, and publish. Watch the student profile update without manually reloading.
+2. **Change office hours.** Edit a day, time, or note and select **Publish office hours**. Students see the revised slots and next planned consultation window.
+3. **Publish a timetable.** Add a class slot with subject and classroom details in its note, then publish. The student's weekly class timetable updates.
+4. **Request a consultation.** Sign in as the student and propose a future meeting. It appears as pending in the teacher's queue.
+5. **Accept or decline.** Respond as the teacher. The student sees the new state and an in-app notification.
+6. **Verify persistence.** Reload the profile and inspect status history. Published data exists independently of the current page.
+
+Use separate devices, browsers, or browser profiles for simultaneous roles. Normal tabs in one browser share the session cookie.
+
+### Demo accounts
+
+The shared demo password is **`DemoPass123!`**.
+
+| Role | Email |
+| --- | --- |
+| Student | `student@vnr.demo` |
+| Professor | `ananya.reddy@vnr.demo` |
+| Second professor | `vikram.rao@vnr.demo` |
+| Administrator | `admin@vnr.demo` |
+
+These credentials are intentionally public for the demonstration. Use sample information; replace this identity setup before an institutional rollout.
+
+## How it works
+
+```mermaid
+flowchart LR
+    T[Teacher workspace] -->|Authenticated update| A[Express API]
+    A -->|Validate and save| D[(PostgreSQL via Prisma)]
+    A -->|Change event after commit| L[Server Sent Events]
+    L -->|Invalidate cached data| S[Student profile]
+    S -->|Fetch latest data| A
+    Q[Door QR or directory] --> S
+```
+
+- **Stable identity:** A stored QR token resolves to a professor. The QR contains the profile URL, not a copy of a changing status.
+- **Checked writes:** The API resolves the session, checks role and ownership, validates input, and saves data. Related status, history, and audit writes use a transaction.
+- **Fresh reads:** A `campus-change` event tells React Query to refresh active data. Polling, reconnects, and screen-focus refreshes help recover when live events are interrupted.
+- **Traceable changes:** Status history, meeting transition events, notifications, and audit records provide context beyond the latest screen state.
+
+The global polling fallback runs every two seconds on visible screens; some pages also have their own intervals. Network conditions and browser background throttling affect timing.
+
+### Three different kinds of availability
+
+| Information | Meaning |
+| --- | --- |
+| **Live status** | The teacher's report: Available, In Class, In Meeting, Away, On Leave, or Unknown. Expired reports are marked stale. |
+| **Weekly schedules** | Recurring class plans and consultation hours in IST. Timetable edits do not automatically change live status. |
+| **Meeting requests** | A specific future date and time proposed by a student, requiring teacher approval. Requests may be outside office hours. |
+
+Schedule validation rejects invalid time ranges and overlapping entries within the same submitted schedule. Accepted-meeting overlaps are checked separately. The prototype does not enforce a combined conflict rule across classes, office hours, and appointments.
+
+## Technology stack
+
+| Layer | Technologies | Responsibility |
+| --- | --- | --- |
+| Frontend | React 19, TypeScript, React Router | Screens, typed components, and routing |
+| Server data | TanStack React Query | Fetching, caching, invalidation, and refresh |
+| Styling and build | Tailwind CSS 4, custom CSS, Vite 6 | Responsive interface and frontend bundling |
+| API | Node.js, Express 4, Zod | Requests, business rules, and runtime validation |
+| Persistence | PostgreSQL, Prisma 6 | Relational records, migrations, and transactions |
+| Authentication | bcryptjs, opaque cookie sessions | Password hashing and database-backed sessions |
+| Live updates | SSE, polling, BroadcastChannel | Cross-device refresh and same-browser tab signals |
+| QR | `qrcode`, `html5-qrcode` | Generate profile codes and support browser scanning |
+| Verification | Vitest, Supertest, Playwright, Node test runner | Unit, API, browser, and deployment-verifier checks |
+| Hosting | Render, GitHub Actions | App deployment and verified Production records |
+
+## Run locally
+
+### Requirements
+
+- **Node.js 22 or newer** and npm.
+- Available ports **55432** for the demo database and **4100** for the API.
+- A browser. The mobile verification scripts use Microsoft Edge.
+
+```bash
+git clone https://github.com/saikoushikpallapolu/Find-My-Professor.git
+cd Find-My-Professor
 npm install
 npm run demo
 ```
 
-The demo runner starts an isolated PostgreSQL instance on port 55432, applies migrations, adds 20 fictional faculty across five departments, starts the API on 4100, and starts Vite on 5173 (or its next available port). Read the URL printed by Vite. It does not edit private environment files or delete existing data. Persistent data lives in .demo-pgdata; subsequent starts preserve status, schedules and meetings. Node 20.11+ is required. Stop the demo with Ctrl+C.
+The runner starts or reuses an isolated embedded PostgreSQL instance, applies migrations, provisions sample accounts, and launches the API and Vite. Docker is not required for this path. Open Vite's printed URL, usually **http://localhost:5173**; it can choose another port if needed. Keep the terminal running and stop with **Ctrl+C**.
 
-## Show it in five minutes
+Data persists in `.demo-pgdata`. Stop an older demo before starting another instance. Avoid `db:reset` and the legacy seed against data you want to keep.
 
-1. Open the homepage and directory. Filter by department or current availability.
-2. Open **Campus QR collection** from the sidebar or homepage. Every professor has a stored, stable QR identity. Scan a QR using a phone camera, or use **Scan QR → Demo QRs** / upload a QR photo.
-3. Choose **Dr. Ananya Reddy** in the account menu. Publish a status such as In Class, a return time and a public note. Keep her QR profile open on a second device; it refreshes immediately through server-sent events, with five-second polling as a fallback.
-4. Edit a weekly slot and select **Publish office hours**. The profile shows the schedule and the next posted office-hours window. Overlaps and invalid times are rejected.
-5. Switch to **Student Patel**, find Ananya, bookmark her and request a future consultation. Switch back to Ananya to accept or decline. The student gets an in-app notification and sees the new state under My campus. Try an overlapping accepted meeting to demonstrate conflict handling.
-6. Print a professor door sign or the entire QR collection.
+### Open it on a phone
 
-Use separate browsers/devices for simultaneous student and professor sessions. Tabs in the same browser share their session cookie. The quick role menu is for this demo, not a production identity system.
+For hosted access, open **[dt-2026.onrender.com](https://dt-2026.onrender.com)** from any reachable network.
 
-## Accounts
+Locally, connect phone and computer to the same Wi-Fi and use Vite's printed **Network** URL. The address can change, and guest Wi-Fi may block device-to-device access. `localhost` on a phone refers to the phone itself.
 
-All demo passwords: **DemoPass123!**
+In-browser scanning requires HTTPS or localhost and camera permission. On a plain HTTP LAN URL, use the phone's native QR scanner, upload a QR image, or open a profile directly. Rehearse camera access on the actual device.
 
-| Role | Email |
+## Verification
+
+| Command | What it checks |
 | --- | --- |
-| Student | student@vnr.demo |
-| Professor | ananya.reddy@vnr.demo |
-| Second professor | vikram.rao@vnr.demo |
-| Administrator | admin@vnr.demo |
+| `npm test` | Shared status logic, office-hour validation, and foundation API behavior |
+| `npm run build` | Workspace TypeScript checks and the production frontend bundle |
+| `npm run demo:verify` | QR identities, roles, saved status and hours, approval, notifications, booking conflicts, and cancellation |
+| `node scripts/verify-dynamic-mobile.mjs` | Separate teacher/student mobile-width sessions, timetable edits, live updates, persistence, permissions, and polling fallback |
+| `node scripts/verify-hosted-mobile.mjs` | Student login and faculty profile rendering on the hosted app |
+| `node --test scripts/verify-render-deployment.test.mjs` | Rejects older or incomplete deployments and accepts matching healthy revisions |
 
-Every sample professor can sign in with firstname.lastname@vnr.demo and the demo password. Names, faculty assignments and room numbers are fictional; this is a student demonstration, not an official college service.
+Start the local demo before workflow and mobile checks. Demo checks perform sample-account writes and leave audit/notification records; the mobile script restores the original status and schedules in cleanup. The hosted smoke check signs in and reads data.
 
-## Phone access
+The original integration suite, `npm run test:legacy -w @wimp/backend`, expects a separate disposable database with the legacy seed. It is not part of normal demo setup.
 
-Connect phone and computer to the same Wi-Fi. Open the **Network** URL printed by Vite, for example http://192.168.29.62:5173. Use this address on the desktop too before displaying/printing QR signs. The address may change with Wi-Fi. Allow the Node server through your firewall if Windows prompts. Guest Wi-Fi with client isolation may prevent access.
+## Deployment
 
-Browser camera access requires HTTPS or localhost. A phone opening a plain HTTP LAN address can use its native Camera app to scan a QR and open the app, upload a QR photo in the scanner, or use Demo QRs. In-app live camera scanning works on localhost and HTTPS; an HTTPS deployment is needed for the full mobile-camera experience. Physical phone camera access has not been tested on your device.
+Render builds and deploys the linked `main` branch. Express serves the frontend and `/api/v1` from one HTTPS origin. [`render.yaml`](render.yaml) describes the service and database; production startup applies migrations and provisions demo accounts.
 
-## Checks
+The [Production workflow](.github/workflows/render-production.yml) runs alongside Render. It waits for the **exact pushed commit** to be live, then checks API health, database-backed faculty data, the login page, and its JavaScript bundle. GitHub records success only after those checks pass. This is deployment verification, not a full app test gate before Render deploys.
 
-- npm run build — shared/backend/frontend TypeScript checks and production frontend build.
-- npm test — status, office-hour validation and foundation API tests. Requires local loopback networking for HTTP tests.
-- npm run demo:verify — run while the demo is running; exercises all 20 QR identities, status propagation, roles, slot persistence/validation, booking approval, notifications, conflicts and cancellation. Restores status and office hours; leaves one cancelled verification meeting and audit/notification records.
-- npm run test:legacy -w @wimp/backend — original checkpoint integration suite; requires the original destructive legacy seed in a separate disposable database. Do not run db:seed or db:reset against the demo or real campus data.
+Keep Render auto-deploy set to deploy on commit; making it wait for this verification job would create a circular dependency. See [deployment tracking](docs/github-deployments.md) for details. Preview deployments are not configured.
 
-## Data pipeline
+## Repository guide
 
-PostgreSQL stores Users, Professors, Departments, Offices, QrCodes (stable token + professor relationship), ProfessorStatus, OfficeHours, MeetingRequests, Events, Favorites, Notifications and AuditLogs. QR PNGs are rendered from stored tokens; changes to status never require replacing the QR. Scan → public QR API → faculty profile/status/hours. Faculty authenticated writes → database transaction → server-sent change event → client refetch (polling fallback). Meeting creation/response writes events and notifications transactionally.
+```text
+frontend/src/          Pages, components, API client, and authentication context
+backend/src/           Express routes, middleware, status logic, and live events
+backend/prisma/        Data model, migrations, and sample-account provisioning
+shared/src/            Shared types, enums, and status-freshness rules
+scripts/               Demo startup, verification, QR, and presentation utilities
+docs/                  Implementation notes and deployment documentation
+presentation_assets/   Product screenshots and presentation graphics
+presentation-guide/    Presentation guides and editable source material
+.github/workflows/     Production deployment verification
+```
 
-Office hours are recurring IST windows for planning. Consultation requests can propose times outside these windows and require faculty approval. Expected return is an estimate; expired status is marked stale and never automatically proves someone is available. Manual status is not overwritten by the old timetable simulation worker.
+**Presenting the project?** Read the [four-page guide](presentation-guide/Find_My_Professor_FOUR_PAGE_GUIDE.docx) or its [Markdown source](presentation-guide/four-page-content.md).
 
-## Deployment boundary
+## Scope and next steps
 
-This is a functional local demonstration, not a production certification. Before a college launch: provision managed PostgreSQL and backups, deploy frontend/API behind one HTTPS origin with /api proxying, replace demo accounts/role switching with college SSO, enforce secure cookies and approved origins, add authentication throttling and monitoring, and perform a security/accessibility/load review. Use a database-level exclusion constraint or serializable retry for concurrent booking acceptance before production scale. No email, push notifications, GPS, or native Android/iOS package is claimed.
+This student project was developed in the VNR VJIET campus context. Demo profiles and room assignments are illustrative; it is not an official college directory or an institutional production service.
 
+- **Teacher-reported information:** No GPS or occupancy sensing. Return times are estimates; stale status is not confirmation of presence.
+- **In-app communication:** Email, SMS, native push, and offline operation are not implemented.
+- **Production hardening:** College SSO, controlled onboarding, login throttling, privacy review, backups, and monitoring remain necessary.
+- **Booking concurrency:** Sequential conflicts are checked; concurrent acceptance needs a database constraint or serializable retry before larger-scale use.
+- **Multiple instances:** Live events use a process-local emitter. Shared event distribution and more targeted refreshes would support scaling.
 
-## Hosted mobile demo
+Next steps are a measured student/faculty pilot, stronger identity and booking guarantees, accessibility and device testing, and optional calendar integrations.
 
-App: https://dt-2026.onrender.com (Render deployment supplied by project owner).
+## Contributing
 
-Use a teacher browser and a separate student phone/browser. Sign in as ananya.reddy@vnr.demo and student@vnr.demo respectively, password DemoPass123!.
-
-1. On the phone, open /qr/vnr-ananya-reddy and leave it open.
-2. On the teacher dashboard, publish a status and public note. The phone updates without reloading.
-3. Edit Weekly class timetable: choose day, start/end, subject and classroom in the note, then Publish class timetable. Students see it under Weekly class timetable.
-4. Edit and publish Weekly office hours. Students see the revised slots and next consultation window.
-5. Request a consultation as the student, accept as the teacher, then observe the student's meeting state and notification.
-
-Timetables persist in PostgreSQL AppSetting records per professor; schedule writes include audit records and broadcast after the database transaction commits. Publishing an empty office-hour schedule remains empty across demo seed/startup. Class timetable entries are planning information; current availability remains teacher-reported.
-
-Run `node scripts/verify-dynamic-mobile.mjs` while the local demo runs to check the timetable editor, status/slot propagation, polling fallback, mobile widths, persistence and write permissions. Verification restores original schedules/status and leaves audit records. The script supports APP_URL for another deployment; it performs reversible demo-account writes.
+Open an [issue](https://github.com/saikoushikpallapolu/Find-My-Professor/issues) with expected behavior and reproduction steps. Work on a branch, run relevant checks, and open a pull request explaining the user-visible result. Include before/after captures for interface changes, using demo data.
